@@ -108,7 +108,7 @@ ol.plan li.ecapt .wn{color:var(--eca)}
 <body>
 <header><h1>Port to Port</h1><span>Distance, route and waypoints</span></header>
 <div class="maptools"><label for="chart">Chart</label><select id="chart"><option value="offline">Offline coastline</option><option value="sea">OpenStreetMap + OpenSeaMap seamarks</option><option value="depth">GEBCO depths + seamarks</option><option value="enc">ECDIS style: NOAA ENC (US waters)</option></select></div>
-<p id="chartMsg" class="chartmsg" hidden>This chart could not load here. Online charts need internet and work in the installed or GitHub Pages version of the app, not inside this preview. The offline coastline is shown instead.</p>
+<p id="chartMsg" class="chartmsg" hidden>This chart could not load. Online charts need internet the first time; areas you have viewed or saved stay available offline. Inside this preview, online charts never load.</p>
 <div id="map" role="region" aria-label="Route map"></div>
 <main>
 <div class="pick" id="pick"><div id="pkBody"></div>
@@ -133,7 +133,7 @@ ol.plan li.ecapt .wn{color:var(--eca)}
  <button class="go" type="submit">Calculate route</button>
 </form>
 <section id="out" aria-live="polite"></section>
-<p class="note">Online charts need internet: OpenStreetMap, OpenSeaMap, GEBCO and NOAA ENC (US waters only). Traffic separation schemes from OpenSeaMap / OpenStreetMap (ODbL) show from zoom 6; coverage depends on volunteers. Saved routes stay on this phone. ECA outlines are approximate (North Sea, Baltic, North American, US Caribbean and Mediterranean SOx ECAs); check the exact boundaries in MARPOL Annex VI before planning bunkers. Ports from the NGA World Port Index (public domain). Sea routes follow the Eurostat SeaRoute / MARNET maritime network (EUPL-1.2). Coastline from Natural Earth (public domain). Ocean legs are great circles; long legs are split at every 5° of longitude. Not for navigation; always plan with official charts, routeing guides and current NtM.</p>
+<p class="note">Online charts need internet: OpenStreetMap, OpenSeaMap, GEBCO and NOAA ENC (US waters only). Traffic separation schemes from OpenSeaMap / OpenStreetMap (ODbL) show from zoom 6; coverage depends on volunteers. Saved routes and viewed charts stay on this phone for offline use. ECA outlines are approximate (North Sea, Baltic, North American, US Caribbean and Mediterranean SOx ECAs); check the exact boundaries in MARPOL Annex VI before planning bunkers. Ports from the NGA World Port Index (public domain). Sea routes follow the Eurostat SeaRoute / MARNET maritime network (EUPL-1.2). Coastline from Natural Earth (public domain). Ocean legs are great circles; long legs are split at every 5° of longitude. Not for navigation; always plan with official charts, routeing guides and current NtM.</p>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
@@ -330,6 +330,7 @@ function render(fit){if(!ST)return;const out=$('out'),spd=parseFloat($('spd').va
   if(w.ecaLeg>=0){ecaNm+=w.leg;byZone[ECAS[w.ecaLeg].name]=(byZone[ECAS[w.ecaLeg].name]||0)+w.leg}
   w.land=w.canal?0:legLand(pr,w);
   for(let s=1,n=Math.max(1,Math.ceil(w.leg/40));s<=n;s++)pts.push(gcPt(pr,w,s/n))}else{w.leg=0;w.cum=0;pts.push(w)}});
+ ST.pts=pts;
  const dur=nm=>{const hrs=nm/spd,d=Math.floor(hrs/24),h=Math.round(hrs-d*24);return d+' d '+h+' h'};
  const cons=parseFloat($('cons').value)||0,res=parseFloat($('reserve').value)||0;
  const ton=nm=>nm/spd/24*cons*(1+res/100),nonEca=cum-ecaNm;
@@ -360,6 +361,7 @@ function render(fit){if(!ST)return;const out=$('out'),spd=parseFloat($('spd').va
   '<ol class="plan">'+html+'</ol><h2>Port details</h2>'+stops.map((s,k)=>portCard(s,k===stops.length-1)).join('');
  $('copy').onclick=()=>{const done=()=>{$('copy').textContent='Copied'};const fb=()=>{const t=document.createElement('textarea');t.value=lastText;document.body.appendChild(t);t.select();try{document.execCommand('copy');done()}catch(e){}t.remove()};
   navigator.clipboard?navigator.clipboard.writeText(lastText).then(done,fb):fb()};
+ $('offl').onclick=saveOffline;
  if($('eStart'))$('eStart').onclick=()=>{editing=true;render()};
  if($('eDone'))$('eDone').onclick=()=>{editing=false;render()};
  if($('eSave'))$('eSave').onclick=()=>{store(tkey(),ST.base);ST.saved=true;ST.edited=false;editing=false;render()};
@@ -381,6 +383,37 @@ $('f').addEventListener('submit',e=>{e.preventDefault();calc()});
 $('swap').onclick=()=>{const t=sel.from;setSel('from',sel.to);setSel('to',t);calc()};
 ['spd','cons','reserve','gcpts'].forEach(id=>$(id).addEventListener('change',()=>render()));
 initMap();calc();
+
+// ---- offline charts: the service worker caches every tile the map shows; this also pre-loads tiles along the route ----
+const SWOK='serviceWorker' in navigator&&/github\.io$|localhost$/.test(location.hostname);
+if(SWOK)navigator.serviceWorker.register('sw.js').then(()=>{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}).catch(()=>{});
+function t2lon(x,z){return x/2**z*360-180}function t2lat(y,z){const n=Math.PI-2*Math.PI*y/2**z;return deg(Math.atan(Math.sinh(n)))}
+function merc(lon,lat){const R=6378137;return[R*rad(lon),R*Math.log(Math.tan(Math.PI/4+rad(lat)/2))]}
+function tileURLs(k,z,x,y){const xs=((x%2**z)+2**z)%2**z,urls=[];
+ const wms=(base,layers,ver,tr)=>{const a=merc(t2lon(x,z),t2lat(y+1,z)),b=merc(t2lon(x+1,z),t2lat(y,z));const bb=a[0]+','+a[1]+','+b[0]+','+b[1];
+  return base+(base.includes('?')?'&':'?')+'service=WMS&request=GetMap&layers='+layers+'&styles=&format=image%2Fpng&transparent='+tr+'&version='+ver+'&width=256&height=256&'+(ver==='1.3.0'?'crs':'srs')+'=EPSG%3A3857&bbox='+bb};
+ const seamark='https://tiles.openseamap.org/seamark/'+z+'/'+xs+'/'+y+'.png';
+ if(k==='sea')urls.push(seamark); // OpenStreetMap base tiles are cached only while viewing (OSM tile policy forbids bulk download)
+ if(k==='depth'){urls.push(wms('https://wms.gebco.net/mapserv?','GEBCO_LATEST','1.1.1','false'),seamark)}
+ if(k==='enc')urls.push(wms('https://gis.charttools.noaa.gov/arcgis/rest/services/MCS/ENCOnline/MapServer/exts/MaritimeChartService/WMSServer','0,1,2,3,4,5,6,7,8,9,10,11,12','1.3.0','true'));
+ return urls}
+function routeTiles(){const set=new Set(),add=(z,x,y)=>{if(y>=0&&y<2**z)set.add(z+'/'+x+'/'+y)};
+ const tx=(lon,z)=>Math.floor((lon+180)/360*2**z),ty=(lat,z)=>{const r=rad(Math.max(-85,Math.min(85,lat)));return Math.floor((1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*2**z)};
+ for(let z=4;z<=9;z++){const pad=z>=7?1:0;for(let i=1;i<ST.pts.length;i++){const A=ST.pts[i-1],B=ST.pts[i],n=Math.max(1,Math.ceil(gc(A.lat,A.lon,B.lat,B.lon)/(2400/2**z)));
+  for(let s=0;s<=n;s++){const la=A.lat+(B.lat-A.lat)*s/n,lo=A.lon+(B.lon-A.lon)*s/n,x=tx(lo,z),y=ty(la,z);for(let dx=-pad;dx<=pad;dx++)for(let dy=-pad;dy<=pad;dy++)add(z,x+dx,y+dy)}}}
+ // harbour approaches in more detail
+ ST.stops.forEach(s=>{const p=P[s];for(let z=10;z<=12;z++){const x=tx(p.lon,z),y=ty(p.lat,z),r=z===10?2:z===11?2:1;for(let dx=-r;dx<=r;dx++)for(let dy=-r;dy<=r;dy++)add(z,x+dx,y+dy)}});
+ return[...set].map(s=>s.split('/').map(Number))}
+let offBusy=false;
+async function saveOffline(){const msg=$('offMsg');
+ if(!SWOK){msg.textContent='Offline saving works in the installed app or on the GitHub Pages site, not in this preview.';return}
+ if(curChart==='offline'){msg.textContent='Choose an online chart first (Chart selector above the map). The offline coastline is always available.';return}
+ if(offBusy||!ST||!ST.pts)return;const tiles=routeTiles(),urls=[];tiles.forEach(([z,x,y])=>tileURLs(curChart,z,x,y).forEach(u=>urls.push(u)));
+ const cap=4000;if(urls.length>cap)urls.length=cap;
+ if(!confirm('Save about '+urls.length+' chart tiles (roughly '+Math.round(urls.length*0.02)+' MB) along this route for offline use?'))return;
+ offBusy=true;let done=0,fail=0,i=0;const step=async()=>{while(i<urls.length){const u=urls[i++];try{await fetch(u,{mode:'no-cors'})}catch(e){fail++}done++;if(done%20===0||done===urls.length)msg.textContent='Saving charts: '+done+' of '+urls.length+(fail?' ('+fail+' failed)':'')}};
+ await Promise.all([step(),step(),step(),step()]);offBusy=false;
+ msg.textContent='Saved '+(done-fail)+' chart tiles for this route'+(fail?' ('+fail+' could not be downloaded)':'')+'. Map areas you open while online are also kept for offline use.'}
 
 </script>
 </body>
