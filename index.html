@@ -354,7 +354,7 @@ function render(fit){if(!ST)return;const out=$('out'),spd=parseFloat($('spd').va
  lastText=names[0].name+' to '+names[names.length-1].name+': '+cum.toFixed(1)+' nm (ECA '+ecaNm.toFixed(1)+' nm, non-ECA '+nonEca.toFixed(1)+' nm)'+(cons?'\nLSMGO '+ton(ecaNm).toFixed(1)+' t, VLSFO '+ton(nonEca).toFixed(1)+' t':'')+'\n'+txt;
  const src=ST.saved?'<p class="badge">Your saved route</p>':'<p class="badge rec">Recommended route</p>';
  const edit='<div class="tools">'+(editing?'<button type="button" class="go small-go" id="eDone">Done editing</button><button type="button" class="sec" id="eSave">Save as my route</button>':'<button type="button" class="sec" id="eStart">Edit route</button>')+
-  '<button type="button" class="sec" id="eReset"'+(ST.saved||ST.edited?'':' disabled')+'>Use recommended</button><button type="button" class="sec" id="copy">Copy waypoint list</button></div>'+
+  '<button type="button" class="sec" id="eReset"'+(ST.saved||ST.edited?'':' disabled')+'>Use recommended</button><button type="button" class="sec" id="copy">Copy waypoint list</button><button type="button" class="sec" id="offl">Save charts for offline</button></div><p class="hint" id="offMsg"></p>'+
   (editing?'<p class="hint">Drag a waypoint on the map to move it. Tap the map to add a waypoint on the nearest leg. Use Delete in the list to remove one.</p>':'')+
   (landWarn?'<p class="err">'+landWarn+' leg'+(landWarn>1?'s':'')+' may cross land. Edit the route to move those waypoints offshore.</p>':'');
  out.innerHTML='<div class="total"><b>'+fmt(cum)+'</b><span>nautical miles</span></div><p class="meta">'+dur(cum)+' at '+spd+' kn</p>'+src+fuel+edit+
