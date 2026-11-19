@@ -489,7 +489,7 @@ html.eta-route .v-eta form>.field,html.eta-route .v-eta form .checks,html.eta-ro
 .leaflet-popup-content p{margin:6px 0}
 .leaflet-popup-tip-container{width:40px;height:20px;position:absolute;left:50%;margin-top:-1px;margin-left:-20px;overflow:hidden;pointer-events:none}
 .leaflet-popup-tip{width:17px;height:17px;padding:1px;margin:-10px auto 0;transform:rotate(45deg);background:#fff;box-shadow:0 3px 14px rgba(0,0,0,.4)}
-.leaflet-popup-close-button{position:absolute;top:-14px;right:-12px;width:34px;height:34px;font:700 22px/30px sans-serif;text-align:center;color:#fff!important;text-decoration:none;background:#E8322E;border:2px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.5);z-index:3}
+.leaflet-popup-close-button{position:absolute;top:-14px;right:-12px;width:34px;height:34px;font:400 24px/29px sans-serif;text-align:center;color:#fff!important;text-decoration:none;background:#1E2C3D;border:2px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.5);z-index:3}
 .leaflet-popup-close-button span{display:block;line-height:30px}
 .leaflet-popup-content a{color:#0B63C5}
 .lowtb{width:100%;border-collapse:collapse;font-size:11.5px;margin:6px 0}.lowtb th{text-align:left;font-size:10px;color:#5B6675;text-transform:uppercase;padding:3px 4px;border-bottom:1px solid #E1E6EC}.lowtb td{white-space:nowrap;padding:3px 4px;border-bottom:1px solid #F0F2F5;color:#1d2a3a}
@@ -591,6 +591,48 @@ html.eta-route .v-eta form>.field,html.eta-route .v-eta form .checks,html.eta-ro
 <div class="llchart" id="llChart" hidden><div class="llbar"><b>World Load Line chart</b><span style="flex:1"></span><button type="button" class="cbtn" id="llZo" aria-label="Zoom out">−</button><button type="button" class="cbtn" id="llZi" aria-label="Zoom in">+</button><button type="button" class="cbtn" id="llPng" aria-label="Save as image">⤓</button><button type="button" class="cbtn" id="llClose" aria-label="Close">✕</button></div><div class="llscroll" id="llScroll"><canvas id="llCanvas"></canvas></div><p class="llhint">Turn the phone sideways for the full chart. Pinch or use + / − to zoom.</p></div>
 <nav class="fbnav" aria-label="Main"><a href="#" data-view="route" class="on"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 17c4-1 4-9 10-10"/></svg></span>Route</a><a href="#" data-view="chart"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg></span>Chart</a><a href="#" data-view="eta"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg></span>ETA</a><a href="#" data-view="ports"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v14M8 7h8M5 13c0 4 3 7 7 7s7-3 7-7"/></svg></span>Ports</a><a href="#" data-view="plan"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg></span>Plan</a><a href="#" data-view="bunker"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5a2 2 0 012-2h7a2 2 0 012 2v16"/><path d="M3 21h13M7 7h5v4H7z"/><path d="M15 9h2a2 2 0 012 2v6a1.5 1.5 0 003 0V8l-3-3"/></svg></span>Bunker</a></nav>
 <section id="printArea" class="printarea" aria-hidden="true"></section>
+<style>
+.ppoff{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top));z-index:5000;max-width:92vw;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#13324A;border:1px solid #2E9D5B;color:#E8EEF5;font:600 12.5px/1.25 sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+.ppoff.y{border-color:#F2A33C;background:#3A2C10}.ppoff.r{border-color:#E8322E;background:#3A1414}.ppoff button{background:none;border:0;color:#fff;font:700 16px sans-serif;padding:0 2px}
+.ppoffn{margin:0 0 8px;padding:8px 10px;border-radius:10px;font-size:.82rem;line-height:1.35;background:#163A2A;border-left:4px solid #2E9D5B;color:#D9F7E8}.ppoffn.y{background:#3A2C10;border-left-color:#F2A33C;color:#FFE7BF}.ppoffn.r{background:#3A1414;border-left-color:#E8322E;color:#FFD5D2}
+</style>
+<script>
+// ===================== Offline weather: every forecast, storm and warning download is saved on the phone and used when there is no internet =====================
+(function(){
+ let dbp=null;
+ const db=()=>dbp||(dbp=new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error('no IndexedDB'));const r=indexedDB.open('ppOffline',1);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains('resp'))d.createObjectStore('resp');if(!d.objectStoreNames.contains('grid'))d.createObjectStore('grid')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
+ const tx=(st,mode,fn)=>db().then(d=>new Promise((res,rej)=>{const t=d.transaction(st,mode),q=fn(t.objectStore(st));t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)}));
+ const IDB=window.ppIDB={get:(st,k)=>tx(st,'readonly',s=>s.get(k)),put:(st,k,v)=>tx(st,'readwrite',s=>s.put(v,k)),all:st=>tx(st,'readonly',s=>s.getAll()),keys:st=>tx(st,'readonly',s=>s.getAllKeys()),del:(st,k)=>tx(st,'readwrite',s=>s.delete(k))};
+ const HOSTS=/(^|\.)(open-meteo\.com|gdacs\.org|sealagom\.com|msi\.nga\.mil|raw\.githubusercontent\.com|codetabs\.com)$/;
+ const keyOf=u=>{try{const x=new URL(u,location.href);if(!(HOSTS.test(x.hostname)||/navwarn\.json$/.test(x.pathname)))return null;['fromdate','todate','fromDate','toDate','_','t','v'].forEach(p=>x.searchParams.delete(p));return x.hostname+x.pathname+'?'+x.searchParams.toString()}catch(e){return null}};
+ const of=window.fetch.bind(window);
+ const age=t=>{const h=(Date.now()-t)/3600000;return h<1?Math.max(1,Math.round(h*60))+' min':h<48?Math.round(h)+' h':Math.round(h/24)+' days'};
+ const cls=t=>{const h=(Date.now()-t)/3600000;return h>48?'r':h>24?'y':''};
+ const utc=t=>{const d=new Date(t);return String(d.getUTCDate()).padStart(2,'0')+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()]+' '+String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0')+' UTC'};
+ const OFF=window.PPOFF={last:0,oldest:null,age,cls,utc,
+  note(t){this.last=Date.now();this.seen=t;this.oldest=this.oldest==null?t:Math.min(this.oldest,t);clearTimeout(this._t);this._t=setTimeout(()=>{this.pill();this.oldest=null},400)},
+  text(t){return 'Offline · saved forecast from '+utc(t)+' ('+age(t)+' old)'},
+  pill(){if(this.oldest==null)return;let p=document.querySelector('.ppoff');if(!p){p=document.createElement('div');p.className='ppoff';document.body.appendChild(p)}p.className='ppoff '+cls(this.oldest);
+   p.innerHTML='<span>📦 '+this.text(this.oldest)+(cls(this.oldest)?' — refresh when online':'')+'</span><button type="button" aria-label="Close">×</button>';p.querySelector('button').onclick=()=>p.remove();clearTimeout(this._p);this._p=setTimeout(()=>p.remove(),14000)}};
+ window.fetch=async function(input,init){const u=typeof input==='string'?input:input&&input.url,m=((init&&init.method)||(input&&input.method)||'GET').toUpperCase(),k=m==='GET'&&u?keyOf(u):null;if(!k)return of(input,init);
+  const saved=()=>IDB.get('resp',k).catch(()=>null),serve=c=>{OFF.note(c.t);return new Response(c.body,{status:200,headers:{'content-type':c.ct||'application/json','x-pp-saved':String(c.t)}})};
+  if(!navigator.onLine){const c=await saved();if(c)return serve(c)}
+  try{let r;const ctl=new AbortController(),c0=await tx('resp','readonly',st=>st.count(k)).catch(()=>0);
+   if(c0){const to=setTimeout(()=>ctl.abort(),45000);try{r=await of(input,{...(init||{}),signal:ctl.signal})}finally{clearTimeout(to)}}else r=await of(input,init);
+   if(r.ok){OFF.last=0;r.clone().text().then(t=>{if(t&&t.trim()&&t.length<15e6){IDB.put('resp',k,{t:Date.now(),body:t,ct:r.headers.get('content-type')||''}).catch(()=>{});try{localStorage.setItem('ppSaved',String(Date.now()))}catch(e){}}}).catch(()=>{});return r}
+   if(r.status>=500&&c0){const c=await saved();if(c)return serve(c)}return r}
+  catch(e){const c=await saved();if(c)return serve(c);throw e}};
+ // the app may continue offline when something has been saved before
+ window.ppOnline=()=>{if(navigator.onLine)return true;try{return !!localStorage.getItem('ppSaved')}catch(e){return false}};
+ // live weather layer grids: keep the last 16 areas viewed online
+ window.ppSaveGrid=async(kind,g)=>{try{if(!g||g.saved)return;const key=kind+':'+[g.s,g.n,g.w,g.e].map(v=>v.toFixed(1)).join(',')+':'+g.z;await IDB.put('grid',key,{...g,kind,savedAt:Date.now()});const ks=(await IDB.keys('grid')).filter(x=>String(x).startsWith(kind+':'));if(ks.length>16){const A=await IDB.all('grid');A.filter(x=>x.kind===kind).sort((a,b)=>a.savedAt-b.savedAt).slice(0,ks.length-16).forEach(x=>IDB.del('grid',x.kind+':'+[x.s,x.n,x.w,x.e].map(v=>v.toFixed(1)).join(',')+':'+x.z))}}catch(e){}};
+ window.ppBestGrid=async(kind,B)=>{try{const A=(await IDB.all('grid')).filter(x=>x&&x.kind===kind&&x.T&&x.T.length);let best=null,bs=0;const area=(s,n,w,e)=>Math.max(0,n-s)*Math.max(0,e-w);
+   A.forEach(g=>{let sc=0;for(const k of[-360,0,360]){const ov=area(Math.max(g.s,B.s),Math.min(g.n,B.n),Math.max(g.w+k,B.w),Math.min(g.e+k,B.e));sc=Math.max(sc,ov)}const va=area(B.s,B.n,B.w,B.e)||1;sc=sc/va-Math.abs((g.z||0)-(B.z||0))*0.03+(g.savedAt/1e13);if(sc>bs){bs=sc;best=g}});
+   if(!best||bs<0.15)return null;return{...best,saved:true}}catch(e){return null}};
+ // tidy: forget saved downloads older than 14 days
+ setTimeout(()=>{const lim=Date.now()-14*864e5;db().then(d=>{const t=d.transaction('resp','readwrite');const c=t.objectStore('resp').openCursor();c.onsuccess=()=>{const cur=c.result;if(!cur)return;if(!cur.value||cur.value.t<lim)cur.delete();cur.continue()}}).catch(()=>{})},8000);
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
 const PFIELDS=[["Alternate name","General","t"],["Region","General","region"],["Water body","General","t"],["Harbor size","General","t"],["Harbor type","General","t"],["Shelter","General","t"],["NAVAREA","General","t"],["Sailing Directions","General","t"],["Chart","General","num0"],["Tidal range","Depths and limits","m"],["Entrance width","Depths and limits","m"],["Channel depth","Depths and limits","m"],["Anchorage depth","Depths and limits","m"],["Cargo pier depth","Depths and limits","m"],["Oil terminal depth","Depths and limits","m"],["LNG terminal depth","Depths and limits","m"],["Max vessel length","Depths and limits","m"],["Max vessel beam","Depths and limits","m"],["Max vessel draft","Depths and limits","m"],["Restriction: tide","Entry","yn"],["Restriction: heavy swell","Entry","yn"],["Restriction: ice","Entry","yn"],["Restriction: other","Entry","yn"],["Overhead limits","Entry","yn"],["Good holding ground","Entry","yn"],["ETA message required","Entry","yn"],["Free pratique","Entry","yn"],["Traffic separation scheme","Entry","yn"],["VTS","Entry","yn"],["First port of entry","Entry","yn"],["Pilotage compulsory","Pilotage and tugs","yn"],["Pilotage available","Pilotage and tugs","yn"],["Pilotage advisable","Pilotage and tugs","yn"],["Local assistance","Pilotage and tugs","yn"],["Tug assistance","Pilotage and tugs","yn"],["Salvage tugs","Pilotage and tugs","yn"],["Wharves","Facilities","yn"],["Anchorage","Facilities","yn"],["Dangerous cargo anchorage","Facilities","yn"],["Container","Facilities","yn"],["Solid bulk","Facilities","yn"],["Liquid bulk","Facilities","yn"],["Breakbulk","Facilities","yn"],["Ro-Ro","Facilities","yn"],["Oil terminal","Facilities","yn"],["LNG terminal","Facilities","yn"],["Med mooring","Facilities","yn"],["Fixed cranes","Facilities","yn"],["Mobile cranes","Facilities","yn"],["Container cranes","Facilities","yn"],["Provisions","Services and supplies","yn"],["Fresh water","Services and supplies","yn"],["Fuel oil","Services and supplies","yn"],["Diesel oil","Services and supplies","yn"],["Deck stores","Services and supplies","yn"],["Engine stores","Services and supplies","yn"],["Medical facilities","Services and supplies","yn"],["Garbage disposal","Services and supplies","yn"],["Dirty ballast disposal","Services and supplies","yn"],["Shore electricity","Services and supplies","yn"],["Diving","Services and supplies","yn"],["Repairs","Services and supplies","t"],["Dry dock","Services and supplies","t"]];
@@ -2067,7 +2109,7 @@ window.snapToRoute=(lat,lon)=>{const w=ST.trk;let best={d:1e9,cum:0,lat:0,lon:0}
  const cmp=d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(((d%360)+360)%360/22.5)%16];
  window.reportWx=async pts=>{const P=pts.map(p=>({lat:p.lat,lon:((p.lon+540)%360)-180}));const W=await multi('https://api.open-meteo.com/v1/forecast',P,'&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl&wind_speed_unit=kn&forecast_days=16&timezone=GMT');let M=[];try{M=await multi('https://marine-api.open-meteo.com/v1/marine',P,'&hourly=wave_height,swell_wave_height,swell_wave_direction,swell_wave_period&forecast_days=8&timezone=GMT')}catch(e){}
   return pts.map((p,i)=>({ws:at(W[i],'wind_speed_10m',p.t),wd:at(W[i],'wind_direction_10m',p.t),wg:at(W[i],'wind_gusts_10m',p.t),pr:at(W[i],'pressure_msl',p.t),hs:at(M[i],'wave_height',p.t),sw:at(M[i],'swell_wave_height',p.t),sd:at(M[i],'swell_wave_direction',p.t),sp:at(M[i],'swell_wave_period',p.t)}))};
- async function loadWx(){const box=$('wxRes');if(!navigator.onLine){box.innerHTML='<p class="err">'+onlineMsg+'</p>';return}box.innerHTML='<p class="bknote">Loading…</p>';
+ async function loadWx(){const box=$('wxRes');if(!ppOnline()){box.innerHTML='<p class="err">'+onlineMsg+'</p>';return}box.innerHTML='<p class="bknote">Loading…</p>';
   try{const pts=samp();const [mar,wnd]=await Promise.all([multi('https://marine-api.open-meteo.com/v1/marine',pts,'&hourly=wave_height,wave_direction,ocean_current_velocity,ocean_current_direction&forecast_days=16&timezone=GMT'),
     multi('https://api.open-meteo.com/v1/forecast',pts,'&hourly=wind_speed_10m,wind_direction_10m&wind_speed_unit=kn&forecast_days=16&timezone=GMT')]);
    const spd=ST.spdUsed||12;let rows='',mxW=0,mxH=0,tCur=0,tNo=0,nC=0,sumA=0,nF=0;if(LG.wx&&map)map.removeLayer(LG.wx);LG.wx=L.layerGroup();
@@ -2130,7 +2172,7 @@ window.snapToRoute=(lat,lon)=>{const w=ST.trk;let best={d:1e9,cum:0,lat:0,lon:0}
   L.marker([p.lat,p.lon],{zIndexOffset:2900,icon:L.divIcon({className:'bulkship',html:'<div style="transform:rotate('+(s.H-90)+'deg)">'+SHIP_SVG+'</div>',iconSize:[54,54],iconAnchor:[27,27]})}).bindPopup(()=>'<div class="wpp"><b class="wph">🚢 Ship at closest approach</b><div class="wpm">'+fmtT(o.cpa.t,0)+' UTC · '+Math.round(o.cpa.dd)+' nm from '+esc(o.name)+'</div><div class="pg"><div><small>Route course</small><b>'+h3(s.crs)+'</b><span>planned</span></div><div><small>Steer about</small><b>'+h3(s.H)+'</b><span>'+(s.off?Math.abs(s.off)+'° to '+(s.off>0?'stbd':'port'):'on course')+'</span></div></div><div class="wpm">Wind from '+h3(s.wind)+(s.est?' (Buys Ballot estimate)':'')+' · '+(s.inPath?'in the path':s.danger?'DANGEROUS semicircle':'NAVIGABLE semicircle')+'</div>'+advice(o)+'</div>',{maxWidth:290,minWidth:230,autoPanPaddingTopLeft:[10,90]}).addTo(g);
   o.stL=g;g.addTo(LG.tc)}
 
- async function loadTc(){const box=$('tcRes');if(!navigator.onLine){box.innerHTML='<p class="err">'+onlineMsg+'</p>';return}box.innerHTML='<p class="bknote">Checking…</p>';busyNote=t=>{box.innerHTML='<p class="bknote">'+t+'</p>'};
+ async function loadTc(){const box=$('tcRes');if(!ppOnline()){box.innerHTML='<p class="err">'+onlineMsg+'</p>';return}box.innerHTML='<p class="bknote">Checking…</p>';busyNote=t=>{box.innerHTML='<p class="bknote">'+t+'</p>'};
   const sh=tShift(),now=Date.now(),sys=[];let gNote='';
   // official named cyclones
   try{const from=new Date(now-5*864e5).toISOString().slice(0,10);const j=await getJ(gdacsTcUrl(5));
@@ -2286,7 +2328,7 @@ window.snapToRoute=(lat,lon)=>{const w=ST.trk;let best={d:1e9,cum:0,lat:0,lon:0}
  const fromFeed=(f,n)=>(f&&f.items||[]).map(it=>{const txt=strip(it.content_text||it.content_html||it.summary||it.title||'');return{id:(it.title&&it.title.length<90?strip(it.title):'NAVAREA '+ROM[n]),date:(it.date_published||it.date_modified||'').replace('T',' ').slice(0,16),text:txt}});
  async function slFeeds(box){const ids=[...Array(21)].map((_,i)=>i+1);let done=0;const res=await Promise.all(ids.map(n=>tget('https://www.sealagom.com/feeds/navarea/'+n+'.json',20000).then(f=>{done++;box.innerHTML='<p class="bknote">Loading worldwide NAVAREA warnings… '+done+'/21</p>';return fromFeed(f,n)}).catch(()=>null)));
   const ok=res.filter(Boolean);if(!ok.length)throw new Error('SeaLagom feeds not reachable');return{items:ok.flat(),areas:ok.length}}
- async function loadNw(){const box=$('nwRes');if(!navigator.onLine){box.innerHTML='<p class="err">'+onlineMsg+'</p>';return}box.innerHTML='<p class="bknote">Loading…</p>';
+ async function loadNw(){const box=$('nwRes');if(!ppOnline()){box.innerHTML='<p class="err">'+onlineMsg+'</p>';return}box.innerHTML='<p class="bknote">Loading…</p>';
   const NGA='https://msi.nga.mil/api/publications/broadcast-warn?output=json&status=active';let items=null,used='',errs=[];
   // the copy kept by the GitHub Action: next to the app, and by full address so it also loads when the app file is opened from the phone
   const COPIES=[];if(/^https?:/.test(location.protocol))COPIES.push(['app copy','./navwarn.json']);COPIES.push(['app copy (GitHub Pages)','https://freeboarddraftsurvey.github.io/port-to-port/navwarn.json'],['app copy (GitHub)','https://raw.githubusercontent.com/freeboarddraftsurvey/port-to-port/main/navwarn.json']);
@@ -2383,7 +2425,7 @@ window.snapToRoute=(lat,lon)=>{const w=ST.trk;let best={d:1e9,cum:0,lat:0,lon:0}
 (function(){
  let busy=false,loaded=0;
  const getJ=async u=>{const r=await fetch(u);if(!r.ok)throw new Error('HTTP '+r.status);const tx=await r.text();if(!tx.trim())return{features:[]};return JSON.parse(tx)};
- async function loadWorld(){if(busy||!map)return;if(!navigator.onLine){alert('Storms (world) needs an internet connection.');return}busy=true;
+ async function loadWorld(){if(busy||!map)return;if(!ppOnline()){alert('Storms (world) needs an internet connection.');return}busy=true;
   if(LG.storms)map.removeLayer(LG.storms);LG.storms=L.layerGroup();const now=Date.now();let nTc=0,nLow=0;
   try{if(window.tcTracker){await tcTracker.icons(true);nTc=tcTracker.list.length}}catch(e){}
   // global pressure grid (8°), lows = local minima below 1000 hPa
@@ -2397,13 +2439,13 @@ window.snapToRoute=(lat,lon)=>{const w=ST.trk;let best={d:1e9,cum:0,lat:0,lon:0}
   loaded=Date.now();busy=false;if(LAY.storms)LG.storms.addTo(map);
   const m=$('chartMsg');if(m){m.hidden=false;m.textContent='Storms (world): '+nTc+' active tropical cyclone'+(nTc===1?'':'s')+' and '+nLow+' low'+(nLow===1?'':'s')+' below 1000 hPa. Tap a symbol for details.';setTimeout(()=>m.hidden=true,6000)}}
  function sync(){if(!map)return;if(!LAY.storms&&window.tcTracker&&!LAY.wxlive)tcTracker.icons(false);if(LAY.storms){if(!LG.storms||Date.now()-loaded>3*3600000)loadWorld();else if(!map.hasLayer(LG.storms))LG.storms.addTo(map)}else if(LG.storms&&map.hasLayer(LG.storms))map.removeLayer(LG.storms)}
- document.addEventListener('click',e=>{if(e.target.closest('[data-lay="storms"]'))setTimeout(sync,0)});setTimeout(()=>{if(LAY.storms&&navigator.onLine)sync()},1500);
+ document.addEventListener('click',e=>{if(e.target.closest('[data-lay="storms"]'))setTimeout(sync,0)});setTimeout(()=>{if(LAY.storms&&ppOnline())sync()},1500);
 })();
 
 // ===================== Weather map (Windy embed): wind, gusts, waves, swell, currents, rain, pressure with the forecast timeline =====================
 (function(){
  function open(){const el=$('wxMap');el.hidden=false;draw()}
- function draw(){const b=$('wxBody');if(!navigator.onLine){b.innerHTML='<div class="wxoff">The weather map needs an internet connection.</div>';return}
+ function draw(){const b=$('wxBody');if(!(navigator.onLine)){b.innerHTML='<div class="wxoff">The weather map needs an internet connection.</div>';return}
   let la=12,lo=120,z=4;try{if(map&&map.getCenter){const c=map.getCenter();if(isFinite(c.lat)){la=c.lat;lo=((c.lng+540)%360)-180;z=Math.max(3,Math.min(9,Math.round(map.getZoom())))}}}catch(e){}
   const ov=$('wxOv').value;try{localStorage.setItem('wxOv',ov)}catch(e){}
   const u='https://embed.windy.com/embed2.html?lat='+la.toFixed(3)+'&lon='+lo.toFixed(3)+'&detailLat='+la.toFixed(3)+'&detailLon='+lo.toFixed(3)+'&zoom='+z+'&level=surface&overlay='+ov+'&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C&radarRange=-1';
@@ -2419,7 +2461,7 @@ window.snapToRoute=(lat,lon)=>{const w=ST.trk;let best={d:1e9,cum:0,lat:0,lon:0}
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
  // Open-Meteo free service allows about 600 point-requests a minute: on 'too many requests' wait and try again
  const getJ=async(u,msg)=>{for(let k=0;k<4;k++){const r=await fetch(u);if(r.status===429){if(msg)msg('The free forecast service is busy; retrying in '+(20*(k+1))+' s…');await wait(20000*(k+1));continue}if(!r.ok)throw new Error('HTTP '+r.status);const tx=await r.text();if(!tx.trim())return{features:[]};return JSON.parse(tx)}throw new Error('the free forecast service is busy, try again in a few minutes')};
- async function load(){if(!ST||!ST.trk||!map){alert('Calculate a route first.');return}if(!navigator.onLine){alert('The wind forecast needs an internet connection.');return}
+ async function load(){if(!ST||!ST.trk||!map){alert('Calculate a route first.');return}if(!ppOnline()){alert('The wind forecast needs an internet connection.');return}
   const w=ST.trk;let la0=90,la1=-90;const lons=w.map(p=>p.lon);let lo0=Math.min(...lons),lo1=Math.max(...lons);w.forEach(p=>{la0=Math.min(la0,p.lat);la1=Math.max(la1,p.lat)});
   la0=Math.max(-75,la0-3);la1=Math.min(80,la1+3);lo0-=3;lo1+=3;let st=1;while(((la1-la0)/st+1)*((lo1-lo0)/st+1)>230)st+=0.5;
   // keep only cells within ~4 grid steps of the route, to follow long routes
@@ -2475,20 +2517,20 @@ window.snapToRoute=(lat,lon)=>{const w=ST.trk;let best={d:1e9,cum:0,lat:0,lon:0}
  const grid=B=>{const NX=15,NY=12,lats=[],lons=[];for(let j=0;j<NY;j++)lats.push(B.s+(B.n-B.s)*j/(NY-1));for(let i=0;i<NX;i++)lons.push(B.w+(B.e-B.w)*i/(NX-1));const pts=[];lats.forEach(la=>lons.forEach(lo=>pts.push([la,((lo+540)%360)-180])));return{NX,NY,lats,lons,pts}};
  async function fetchGrid(base,q,pts){const res=[];for(let k=0;k<pts.length;k+=72){const c=pts.slice(k,k+72);if(k)await wait(800);const j=await getJ(base+'?latitude='+c.map(p=>p[0].toFixed(2)).join(',')+'&longitude='+c.map(p=>p[1].toFixed(2)).join(',')+q);(Array.isArray(j)?j:[j]).forEach(x=>res.push(x))}return res}
  // ---- data: wind + pressure always; marine (currents, waves) when that layer is chosen
- async function load(force){if(busy)return;if(!navigator.onLine){msg('The live weather layer needs an internet connection.');return}
+ async function load(force){if(busy)return;if(!ppOnline()){msg('The live weather layer needs an internet connection.');return}
   const B=box(),inside=g=>g&&g.s<=map.getBounds().getSouth()&&g.n>=map.getBounds().getNorth()&&g.w<=map.getBounds().getWest()&&g.e>=map.getBounds().getEast()&&Math.abs(g.z-B.z)<2&&Date.now()-g.at<3*3600000;
   busy=true;try{
    if(!inside(G)){msg('Loading the forecast…');const gr=grid(B),res=await fetchGrid('https://api.open-meteo.com/v1/forecast','&hourly=wind_speed_10m,wind_direction_10m,pressure_msl&wind_speed_unit=kn&forecast_days=6&timezone=GMT',gr.pts);
     const T=res[0].hourly.time.map(t=>Date.parse(t+'Z')),nh=T.length,U=[],V=[],Pr=[];for(let h=0;h<nh;h++){const u=new Float32Array(gr.NX*gr.NY),v=new Float32Array(gr.NX*gr.NY),p=new Float32Array(gr.NX*gr.NY);
      for(let k=0;k<gr.NX*gr.NY;k++){const H=res[k].hourly,sp=H.wind_speed_10m[h],d=H.wind_direction_10m[h]*Math.PI/180;u[k]=sp==null?NaN:-sp*Math.sin(d);v[k]=sp==null?NaN:-sp*Math.cos(d);p[k]=H.pressure_msl[h]==null?NaN:H.pressure_msl[h]}U.push(u);V.push(v);Pr.push(p)}
-    G={...gr,...B,T,U,V,Pr,at:Date.now()};if(!hIdx){const now=Date.now();hIdx=Math.max(0,T.findIndex(t=>t>=now-1800000))}$('wlR').max=String(nh-1);$('wlR').value=String(hIdx)}
-   if(SET.mode!=='wind'&&!inside(M)){msg('Loading currents and waves…');const gr=grid(B),res=await fetchGrid('https://marine-api.open-meteo.com/v1/marine','&hourly=wave_height,wave_direction,ocean_current_velocity,ocean_current_direction&forecast_days=6&timezone=GMT',gr.pts);
+    G={...gr,...B,T,U,V,Pr,at:Date.now()};ppSaveGrid('G',G);if(!hIdx){const now=Date.now();hIdx=Math.max(0,T.findIndex(t=>t>=now-1800000))}$('wlR').max=String(nh-1);$('wlR').value=String(hIdx)}
+   if((SET.mode!=='wind'||window.PP_SAVEALL)&&!inside(M)){msg('Loading currents and waves…');const gr=grid(B),res=await fetchGrid('https://marine-api.open-meteo.com/v1/marine','&hourly=wave_height,wave_direction,ocean_current_velocity,ocean_current_direction&forecast_days=6&timezone=GMT',gr.pts);
     const unit=(res[0].hourly_units||{}).ocean_current_velocity||'km/h',cf=/km/.test(unit)?1/1.852:/m\/s/.test(unit)?1.94384:1,T=res[0].hourly.time.map(t=>Date.parse(t+'Z')),nh=T.length,CU=[],CV=[],WH=[],WU=[],WV=[];
     for(let h=0;h<nh;h++){const a=new Float32Array(gr.NX*gr.NY),b=new Float32Array(gr.NX*gr.NY),c=new Float32Array(gr.NX*gr.NY),d=new Float32Array(gr.NX*gr.NY),e=new Float32Array(gr.NX*gr.NY);
      for(let k=0;k<gr.NX*gr.NY;k++){const H=res[k]&&res[k].hourly;if(!H){a[k]=b[k]=c[k]=d[k]=e[k]=NaN;continue}const cs=H.ocean_current_velocity[h],cd=H.ocean_current_direction[h],wh=H.wave_height[h],wd=H.wave_direction[h];
       a[k]=cs==null||cd==null?NaN:cs*cf*Math.sin(cd*Math.PI/180);b[k]=cs==null||cd==null?NaN:cs*cf*Math.cos(cd*Math.PI/180);c[k]=wh==null?NaN:wh;d[k]=wd==null?NaN:-Math.sin(wd*Math.PI/180)*(4+wh*2);e[k]=wd==null?NaN:-Math.cos(wd*Math.PI/180)*(4+wh*2)}CU.push(a);CV.push(b);WH.push(c);WU.push(d);WV.push(e)}
-    M={...gr,...B,T,CU,CV,WH,WU,WV,at:Date.now()}}
-   render()}catch(err){msg('Could not load the forecast ('+esc(err.message)+').')}busy=false}
+    M={...gr,...B,T,CU,CV,WH,WU,WV,at:Date.now()};ppSaveGrid('M',M)}
+   render()}catch(err){const sg=await ppBestGrid('G',B);if(sg){G={...sg,at:Date.now()};const sm=await ppBestGrid('M',B);if(sm)M={...sm,at:Date.now()};if(!hIdx){const now=Date.now();hIdx=Math.max(0,G.T.findIndex(t=>t>=now-1800000))}$('wlR').max=String(G.T.length-1);$('wlR').value=String(Math.min(hIdx,G.T.length-1));render();msg('📦 Offline · saved forecast from '+PPOFF.utc(sg.savedAt)+' ('+PPOFF.age(sg.savedAt)+' old). Areas outside the saved map stay blank.')}else msg('No internet and no saved forecast for this area. Save it next time you are online (Plan → Save weather for offline).')}busy=false}
  function samp(g,arr,la,lo){while(lo<g.w)lo+=360;while(lo>g.e)lo-=360;const fx=(lo-g.w)/(g.e-g.w)*(g.NX-1),fy=(la-g.s)/(g.n-g.s)*(g.NY-1);if(fx<0||fy<0||fx>g.NX-1||fy>g.NY-1)return NaN;
   const i=Math.min(g.NX-2,Math.floor(fx)),j=Math.min(g.NY-2,Math.floor(fy)),a=fx-i,b=fy-j,k=j*g.NX+i;return arr[k]*(1-a)*(1-b)+arr[k+1]*a*(1-b)+arr[k+g.NX]*(1-a)*b+arr[k+g.NX+1]*a*b}
  const hOf=(g,t)=>{let best=0,bd=1e18;g.T.forEach((x,i)=>{const d=Math.abs(x-t);if(d<bd){bd=d;best=i}});return best};
@@ -2585,7 +2627,7 @@ window.snapToRoute=(lat,lon)=>{const w=ST.trk;let best={d:1e9,cum:0,lat:0,lon:0}
  const cat=kt=>kt>=137?5:kt>=113?4:kt>=96?3:kt>=83?2:kt>=64?1:kt>=34?'TS':'TD';
  const catCol=c=>({TD:'#5AA9E6',TS:'#4CC27A',1:'#F2D23C',2:'#F2A33C',3:'#F2683C',4:'#E8322E',5:'#B0157A'})[c];
  const tcSvg=(c,south)=>{const k=catCol(c),arm='<path d="M-3-7C2-17 13-21 22-18C14-15 9-10 8-2C6-6 2-8-3-7Z"/>';return '<div class="tcspin'+(south?' s':'')+'"><svg viewBox="-24 -24 48 48" width="46" height="46"><g fill="'+k+'" stroke="#fff" stroke-width="1.3">'+arm+'<g transform="rotate(180)">'+arm+'</g><circle r="9.5"/></g></svg><b>'+c+'</b></div>'};
- async function loadTc(){if(!SET.storms||!navigator.onLine)return;if(window.tcTracker)tcTracker.icons(true)}
+ async function loadTc(){if(!SET.storms||!ppOnline())return;if(window.tcTracker)tcTracker.icons(true)}
  // ---- show / hide, settings
  function show(v){on=v;$('wlBar').hidden=!v;$('wlLeg').hidden=!v;if(c1){c1.style.display=c2.style.display=v?'block':'none'}if(!v){cancelAnimationFrame(raf);clearInterval(timer);timer=null;$('wlPlay').textContent='▶';if(ship){map.removeLayer(ship);ship=null}if(window.tcTracker&&!LAY.storms)tcTracker.icons(false);if(lowL&&map.hasLayer(lowL))map.removeLayer(lowL);$('wlSet').hidden=true;return}
   if(!map){setTimeout(()=>{if(on)show(true)},500);return}bind();canv();if(G)render();load();loadTc()}
@@ -2615,7 +2657,7 @@ window.snapToRoute=(lat,lon)=>{const w=ST.trk;let best={d:1e9,cum:0,lat:0,lon:0}
  const pD=s=>{const m=/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})/.exec(s||'');return m?Date.UTC(+m[3],+m[2]-1,+m[1],+m[4],+m[5]):null};
  const ago=t=>{const h=Math.round((Date.now()-t)/3600000);return h<1?'just now':h<48?h+' h ago':Math.round(h/24)+' d ago'};
  const wTxt=kt=>{const u=(W&&W.set&&W.set.unit)||'kt';if(u==='bft'){const b=[1,3,6,10,16,21,27,33,40,47,55,63].findIndex(x=>kt<x);return(b<0?12:b)+' Bft'}if(u==='ms')return(kt*0.5144).toFixed(0)+' m/s';return Math.round(kt)+' kn'};
- async function loadList(){if(!navigator.onLine)return[];const now=Date.now();if(TCS.length&&now-loaded<3*3600000)return TCS;
+ async function loadList(){if(!ppOnline())return[];const now=Date.now();if(TCS.length&&now-loaded<3*3600000)return TCS;
   const j=await getJ(gdacsTcUrl(5));
   TCS=(j.features||[]).filter(f=>{const p=f.properties||{};return f.geometry&&(!p.eventtype||p.eventtype==='TC')&&(p.iscurrent==='true'||Date.parse(p.todate+'Z')>now-36*3600000)}).map(f=>{const p=f.properties,c=f.geometry.coordinates,kt=(p.severitydata&&p.severitydata.severity||0)/1.852;
    return{id:p.eventid,ep:p.episodeid,name:(()=>{let n=(p.eventname||p.name||'').replace(/^Tropical Cyclone\s+/i,'');if(/^\d{1,2}-\d{5,}$/.test(n))return 'TC '+n.split('-')[0];return n.replace(/-\d+$/,'')})(),full:p.name||'',lat:c[1],lon:c[0],kt,cat:cat(kt),t:Date.parse(p.todate+'Z')||now,geo:p.url&&p.url.geometry,report:p.url&&p.url.report,alert:p.alertlevel}}).sort((a,b)=>b.kt-a.kt);loaded=now;return TCS}
@@ -2659,7 +2701,7 @@ window.snapToRoute=(lat,lon)=>{const w=ST.trk;let best={d:1e9,cum:0,lat:0,lon:0}
 
  // ---- three forecast tracks from different weather models (like the multi-model view on weather apps)
  const MODELS=[['ecmwf_ifs025','ECMWF','#FFD166'],['gfs_seamless','GFS','#7FD4FF'],['jma_seamless','JMA','#FF8FA3']];let modL=null;
- async function modelTracks(s,i){if(!navigator.onLine)return;const span=10,st=2.5,lats=[],lons=[];for(let a=-span;a<=span+1e-6;a+=st){lats.push(s.lat+a);lons.push(s.lon+a)}
+ async function modelTracks(s,i){if(!ppOnline())return;const span=10,st=2.5,lats=[],lons=[];for(let a=-span;a<=span+1e-6;a+=st){lats.push(s.lat+a);lons.push(s.lon+a)}
   const pts=[];lats.forEach(la=>lons.forEach(lo=>pts.push([Math.max(-80,Math.min(80,la)),((lo+540)%360)-180])));
   let res=[];try{for(let k=0;k<pts.length;k+=81){const c=pts.slice(k,k+81);const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+c.map(p=>p[0].toFixed(2)).join(',')+'&longitude='+c.map(p=>p[1].toFixed(2)).join(',')+'&hourly=pressure_msl,wind_speed_10m&wind_speed_unit=kn&models='+MODELS.map(m=>m[0]).join(',')+'&forecast_days=5&timezone=GMT');if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();(Array.isArray(j)?j:[j]).forEach(x=>res.push(x))}}catch(e){const n=document.getElementById('tcModels');if(n)n.textContent='Model tracks not available ('+e.message+')';return}
   if(sel!==i)return;if(modL)map.removeLayer(modL);modL=L.layerGroup();const N=lats.length,T=res[0].hourly.time.map(t=>Date.parse(t+'Z')),h0=Math.max(0,T.findIndex(t=>t>=Date.now()-3*3600000));const out=[];
@@ -2681,7 +2723,7 @@ window.snapToRoute=(lat,lon)=>{const w=ST.trk;let best={d:1e9,cum:0,lat:0,lon:0}
   $('tcInfoX').onclick=()=>mini(true)}
  function mini(v){const e=$('tcInfo'),st=$('tcStrip'),ch=$('tcChip');if(v){e.hidden=true;st.hidden=true;const s=TCS[sel];ch.hidden=false;ch.innerHTML='🌀 '+(s?esc(s.name)+' · details':'Storms')+' ▴'}else{ch.hidden=true;if(sel!=null)e.hidden=false;st.hidden=false;strip()}}
  function strip(){const e=$('tcStrip');if(!e)return;if(!TCS.length){e.hidden=true;return}e.hidden=false;e.innerHTML=TCS.map((s,i)=>'<button type="button" class="tccard'+(sel===i?' on':'')+'" data-tci="'+i+'">'+sym(s.cat,s.lat<0,false,34)+'<span>'+esc(s.name)+'</span></button>').join('');e.querySelectorAll('[data-tci]').forEach(b=>b.onclick=()=>select(+b.dataset.tci))}
- async function open(){if(!map){setTimeout(open,400);return}if(!navigator.onLine){alert('The hurricane tracker needs an internet connection.');return}
+ async function open(){if(!map){setTimeout(open,400);return}if(!ppOnline()){alert('The hurricane tracker needs an internet connection.');return}
   const e=$('tcStrip');e.hidden=false;e.innerHTML='<span class="tcload">Loading active storms…</span>';
   try{await loadList()}catch(err){e.innerHTML='<span class="tcload">Could not load the storm list ('+esc(err.message)+').</span>';return}
   if(!TCS.length){e.innerHTML='<span class="tcload">No official active tropical cyclones right now (GDACS). Model storms show on Wind &amp; pressure (live) as red symbols.</span>';setTimeout(()=>{if(!sel)e.hidden=true},6000);return}drawAll();strip()}
@@ -3113,6 +3155,16 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
 </script>
 <style>
 /* ---- Plan section: professional layout ---- */
+.psx,#out .psx,#out .tools.tgrid.psx,#out .wptoggle.psx{display:none!important}
+#out.ptabs .psec{margin-top:6px}
+.psum{margin:12px 0 4px}.pshead{font:800 .72rem/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:4px 0 8px}
+.psgrid{display:grid;grid-template-columns:1fr;gap:8px}
+.psgrid button{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:8px 12px;border-radius:14px;border:1px solid #24364A;background:#121C28;color:#E8EEF5;text-align:left;font:inherit}
+.psgrid button:active{background:#1B2A3B}
+.psgrid .pi{width:36px;height:36px;flex:0 0 36px;border-radius:11px;background:#1B2A3B;display:grid;place-items:center;color:var(--track)}.psgrid .pi svg{width:19px;height:19px}
+.psgrid .pt{flex:1;min-width:0}.psgrid b{display:block;font-size:.95rem}.psgrid small{display:block;color:#93A4B8;font-size:.78rem;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.psgrid .ch{color:#5B6F86}.psgrid .ch svg{width:18px;height:18px}
+@media (min-width:600px){.psgrid{grid-template-columns:1fr 1fr}}
 .pnav{position:sticky;top:0;z-index:40;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 10px;padding:8px 16px;background:var(--paper);box-shadow:0 6px 10px -6px rgba(0,0,0,.6);-webkit-overflow-scrolling:touch}
 .pnav::-webkit-scrollbar{display:none}
 .pnav button{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:62px;min-height:54px;padding:6px 6px;border-radius:12px;border:1px solid #24364A;background:#121C28;color:#B8C6D6;font:600 .66rem/1.1 "Plus Jakarta Sans",sans-serif}
@@ -3153,16 +3205,18 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
   xls:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/>',pdf:'<path d="M7 8V3h10v5"/><rect x="3" y="8" width="18" height="9" rx="2"/><path d="M7 14h10v7H7z"/>',
   share:'<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/>',
   rtz:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5l-5 2l2-5z"/>',offl:'<path d="M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9a4 4 0 0 1 0 9"/><path d="M12 11v8"/><path d="M9 16l3 3l3-3"/>',
-  berth:'<circle cx="12" cy="5" r="2"/><path d="M12 7v14"/><path d="M5 13a7 7 0 0 0 14 0"/>',pilot:'<path d="M5 21V4"/><path d="M5 4h12l-3 4l3 4H5"/>',list:'<path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'};
+  off:'<path d="M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9a4 4 0 0 1 0 9"/><path d="M12 11v8"/><path d="M9 16l3 3l3-3"/>',chev:'<path d="M9 6l6 6l-6 6"/>',berth:'<circle cx="12" cy="5" r="2"/><path d="M12 7v14"/><path d="M5 13a7 7 0 0 0 14 0"/>',pilot:'<path d="M5 21V4"/><path d="M5 4h12l-3 4l3 4H5"/>',list:'<path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'};
  const sv=k=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+I[k]+'</svg>';
  const TL={eStart:['edit','Edit route'],eDone:['done','Done editing'],eReset:['reset','Use recommended'],copy:['copy','Copy list'],xXlsx:['xls','Excel'],xPdf:['pdf','PDF / Print'],xShare:['share','Share'],xRtz:['rtz','ECDIS export'],offl:['offl','Offline charts']};
  const q=s=>document.querySelector(s);
+ const TABS=[['summary','Summary'],['passage','Passage'],['wps','Waypoints'],['tools','Tools'],['loadline','Load line'],['pos','Position'],['wx','Weather'],['storm','Storms'],['warn','Warnings'],['off','Offline']];
+ let TAB=(()=>{try{return localStorage.getItem('planTab')||'summary'}catch(e){return'summary'}})();
  const SECS=[['summary','Summary',()=>q('#out .hero')],['passage','Passage',()=>q('#out table.pplan')],['tools','Tools',()=>q('#out .tools')],['wps','Waypoints',()=>q('#out ol.plan')||q('#out .wpwrap')],['ports','Ports',()=>q('#ports')],['loadline','Load line',()=>q('#llcard')],['pos','Position',()=>q('#vpCard')],['wx','Weather',()=>q('#wxGo')&&q('#wxGo').closest('.onl')],['storm','Storms',()=>q('#tcGo')&&q('#tcGo').closest('.onl')],['warn','Warnings',()=>q('#nwGo')&&q('#nwGo').closest('.onl')||[...document.querySelectorAll('#out .onl')].pop()]];
  function head(el,ic,txt){if(!el||el.previousElementSibling&&el.previousElementSibling.classList.contains('psec'))return;const h=document.createElement('div');h.className='psec';h.innerHTML='<span class="pi">'+sv(ic)+'</span>'+txt;el.parentNode.insertBefore(h,el)}
  let busy=false;
  function dress(){const out=$('out');if(!out||busy||!out.querySelector('.hero'))return;busy=true;try{
-  if(!out.querySelector('.pnav')){const n=document.createElement('nav');n.className='pnav';n.setAttribute('aria-label','Plan sections');n.innerHTML=SECS.filter(([k])=>k!=='ports'||(q('#ports')&&q('#ports').offsetParent)).map(([k,l])=>'<button type="button" data-ps="'+k+'">'+sv(k)+'<span>'+l+'</span></button>').join('');out.insertBefore(n,out.firstChild);
-   n.addEventListener('click',e=>{const b=e.target.closest('[data-ps]');if(!b)return;const S=SECS.find(x=>x[0]===b.dataset.ps),el=S&&S[2]();if(!el)return;n.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));const tgt=el.previousElementSibling&&el.previousElementSibling.classList.contains('psec')?el.previousElementSibling:el;window.scrollTo({top:tgt.getBoundingClientRect().top+window.scrollY-74,behavior:'smooth'})})}
+  if(!out.querySelector('.pnav')){const n=document.createElement('nav');n.className='pnav';n.setAttribute('aria-label','Plan sections');n.setAttribute('role','tablist');n.innerHTML=TABS.map(([k,l])=>'<button type="button" role="tab" data-ps="'+k+'">'+sv(k)+'<span>'+l+'</span></button>').join('');out.insertBefore(n,out.firstChild);
+   n.addEventListener('click',e=>{const b=e.target.closest('[data-ps]');if(b)setTab(b.dataset.ps,true)})}
   // section headings
   head(q('#out table.pplan'),'passage','Passage plan');
   const tools=q('#out .tools');if(tools){head(tools,'tools','Route tools & export');if(!tools.classList.contains('tgrid'))tools.classList.add('tgrid');
@@ -3177,7 +3231,28 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
   const H=[['#llcard .llhead h3','loadline'],['#vpCard h3','pos']];H.forEach(([s,k])=>{const h=q(s);if(h&&!h.querySelector('.hi'))h.insertAdjacentHTML('afterbegin','<span class="hi">'+sv(k)+'</span>')});
   [['#wxGo','wx'],['#tcGo','storm'],['#nwGo','warn']].forEach(([s,k])=>{const b=q(s);if(!b)return;const c=b.closest('.onl'),h=c&&c.querySelector('h3');if(h&&!h.querySelector('.hi'))h.insertAdjacentHTML('afterbegin','<span class="hi">'+sv(k)+'</span>');if(!b.querySelector('.gi'))b.insertAdjacentHTML('afterbegin','<span class="gi">'+sv(k)+'</span>')});
   const vb=q('#vpCard .go');if(vb&&!vb.querySelector('.gi'))vb.insertAdjacentHTML('afterbegin','<span class="gi">'+sv('pos')+'</span>');
+  assign(out);summary(out);apply(out);
  }catch(e){console.warn('plan dress',e)}finally{busy=false}}
+ // ---- one section at a time: the icon bar works as tabs
+ function assign(out){let cur='summary';for(const c of out.children){if(c.classList.contains('pnav'))continue;const tx=c.classList.contains('psec')?c.textContent:'';
+   if(c.classList.contains('psec')){cur=/^Passage/.test(tx)?'passage':/^Route tools/.test(tx)?'tools':/^Waypoints/.test(tx)?'wps':/^Load line/.test(tx)?'loadline':/^Ports/.test(tx)?'ports':/^Voyage/.test(tx)?'none':cur}
+   let k=cur;if(c.matches('.hero,.total,.meta,.badge,#alts,.gorow,table.eta,.landchk,.psum'))k='summary';if(c.id==='ports'||c.classList.contains('portcard'))k='ports';if(c.id==='onl')k='onl';if(c.matches('.ppdisc,#offMsg,.err'))k='all';if(c.classList.contains('psec')&&/^Voyage/.test(tx))k='none';
+   c.dataset.pst=k}
+  const onl=$('onl');if(onl)for(const d of onl.children){d.dataset.pst=d.id==='ppSaveCard'?'off':d.id==='vpCard'?'pos':d.querySelector('#wxGo')?'wx':d.querySelector('#tcGo')?'storm':d.querySelector('#nwGo')?'warn':'pos'}}
+ function apply(out){const t=TAB;out.classList.add('ptabs');for(const c of out.children){if(c.classList.contains('pnav'))continue;const k=c.dataset.pst;const show=k==='all'||k===t||(k==='onl'&&['pos','wx','storm','warn','off'].includes(t));c.classList.toggle('psx',!show)}
+  const onl=$('onl');if(onl)for(const d of onl.children)d.classList.toggle('psx',d.dataset.pst!==t);
+  const n=out.querySelector('.pnav');if(n)n.querySelectorAll('button').forEach(b=>{const on=b.dataset.ps===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)})}
+ function setTab(k,scroll){TAB=k;try{localStorage.setItem('planTab',k)}catch(e){}const out=$('out');if(!out)return;apply(out);const n=out.querySelector('.pnav'),b=n&&n.querySelector('[data-ps="'+k+'"]');if(b)b.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});if(scroll){const top=out.getBoundingClientRect().top+window.scrollY-8;if(window.scrollY>top)window.scrollTo({top,behavior:'smooth'})}}
+ window.planTab=setTab;
+ // summary: the key figures and one tile per section
+ function summary(out){const hero=out.querySelector('.hero');if(!hero)return;let p=out.querySelector('.psum');const txt=s=>{const e=q(s);return e?e.textContent.replace(/\s+/g,' ').trim():''};
+  const nWp=out.querySelectorAll('ol.plan > li').length||(ST&&ST.trk?ST.trk.length:0),dist=ST&&ST.total?fmt(ST.total)+' nm':'',ll=out.querySelectorAll('#llcard table tr').length,
+   st=id=>{const e=$(id);if(!e||!e.textContent.trim())return'Tap to check';const t=e.textContent;if(/Loading|Checking/.test(t.slice(0,30)))return'Loading…';if(id==='tcRes')return /No tropical|no storm|No storm/i.test(t)?'Clear':'Check result';if(id==='nwRes'){const m=t.match(/(\d+)\s+warning/i);return m?m[1]+' warnings':'Loaded'}return'Loaded'},
+   vp=(()=>{try{return VPOS?'Updated':'Not set'}catch(e){return'Not set'}})(),off=(()=>{try{const t=+localStorage.getItem('ppSavedAll')||0;return t&&window.PPOFF?PPOFF.age(t)+' ago':'Not saved'}catch(e){return'Not saved'}})();
+  const T=[['passage','Passage plan',dist],['wps','Waypoints',nWp?nWp+' points':''],['tools','Tools & export','PDF · Excel · ECDIS'],['loadline','Load line',ll>1?(ll-1)+' zones':''],['pos','Vessel position',vp],['wx','Weather',st('wxRes')],['storm','Storms',st('tcRes')],['warn','NAVAREA',st('nwRes')],['off','Offline save',off]];
+  const html='<div class="pshead">Plan sections</div><div class="psgrid">'+T.map(([k,l,v])=>'<button type="button" data-go="'+k+'"><span class="pi">'+sv(k)+'</span><span class="pt"><b>'+l+'</b><small>'+esc(v||'')+'</small></span><span class="ch">'+sv('chev')+'</span></button>').join('')+'</div>';
+  if(!p){p=document.createElement('div');p.className='psum';const after=out.querySelector('.gorow')||hero;after.after(p);p.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)setTab(b.dataset.go,true)})}
+  if(p.dataset.h!==html){p.dataset.h=html;p.innerHTML=html}}
  let tm=0;const mo=new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(dress,60)});
  function start(){const out=$('out');if(!out)return setTimeout(start,500);mo.observe(out,{childList:true,subtree:true});dress()}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
@@ -3301,9 +3376,9 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
   const sumMap={};E.summary.forEach(r=>sumMap[r[0]]=r[1]);const g=k=>sumMap[k]!=null?sumMap[k]:'—';
   // noon (12 UTC) positions from the vessel position / departure to arrival
   const noon=[];{let d=new Date(dep);d.setUTCHours(12,0,0,0);if(d.getTime()<=dep)d=new Date(d.getTime()+864e5);for(let t=d.getTime();t<arr&&noon.length<60;t+=864e5){const dd=dAtT(t),p=ptAt(dd);noon.push({t,lat:p.lat,lon:p.lon,d:dd})}}
-  let wx=null;if(noon.length&&navigator.onLine&&window.reportWx){try{wx=await window.reportWx(noon)}catch(e){wx=null}}
+  let wx=null;if(noon.length&&ppOnline()&&window.reportWx){try{wx=await window.reportWx(noon)}catch(e){wx=null}}
   const storms=(window.TCLAST||[]).filter(o=>o&&o.lat!=null).map(o=>({...o}));
-  for(const o of storms){o._M=null;o._M=meets(o);if(o._M.length&&navigator.onLine&&window.reportWx){try{const X=await window.reportWx(o._M.map(m=>({lat:m.p.lat,lon:m.p.lon,t:m.q.t})));o._M.forEach((m,i)=>m.wx=X[i])}catch(e){}}}
+  for(const o of storms){o._M=null;o._M=meets(o);if(o._M.length&&ppOnline()&&window.reportWx){try{const X=await window.reportWx(o._M.map(m=>({lat:m.p.lat,lon:m.p.lon,t:m.q.t})));o._M.forEach((m,i)=>m.wx=X[i])}catch(e){}}}
   const labels=E.rows.map(r=>r[1]);
   const maxB=wx?Math.max(...wx.map(x=>x&&x.ws!=null?bft(x.ws):0)):null,maxH=wx?Math.max(...wx.map(x=>x&&x.hs!=null?x.hs:0)):null;
   const head='<div class="hd"><div><small>BERTH-TO-BERTH PASSAGE PLAN</small><h1>Passage Plan</h1><p>'+E_(E.title)+(E.via?' · via '+E_(E.via):'')+'</p></div><div class="lg">'+IC.ship+'<b>FREEBOARD</b><span>Port to Port</span></div></div>';
@@ -3355,7 +3430,7 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
 <style>
 .exsheet{position:fixed;inset:0;z-index:4000;background:rgba(5,10,16,.72);display:flex;align-items:flex-end;justify-content:center}
 .exsheet .box{width:100%;max-width:560px;max-height:88vh;overflow:auto;background:#121C28;border:1px solid #24364A;border-radius:18px 18px 0 0;padding:16px 16px 22px;color:#E8EEF5;box-shadow:0 -10px 30px rgba(0,0,0,.5)}
-.exsheet h3{margin:0 0 4px;font-size:1.1rem;display:flex;align-items:center;gap:10px}.exsheet h3 button{margin-left:auto;width:36px;height:36px;border-radius:50%;border:0;background:#E8322E;color:#fff;font:700 20px/36px sans-serif}
+.exsheet h3{margin:0 0 4px;font-size:1.1rem;display:flex;align-items:center;gap:10px}.exsheet h3 button{margin-left:auto;flex:0 0 38px;width:38px;height:38px;min-width:38px;min-height:38px;max-height:38px;aspect-ratio:1;padding:0;border-radius:50%;border:1px solid #2A4058;background:#1E2C3D;color:#C9D6E3;display:grid;place-items:center;font-size:0;line-height:0;box-shadow:none;cursor:pointer}.exsheet h3 button:active{background:#2A3D52}.exsheet h3 button svg{width:18px;height:18px;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;fill:none}
 .exsheet p.sub{margin:0 0 12px;color:#93A4B8;font-size:.85rem}
 .exsheet .fmt{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:12px;margin:0 0 8px;border-radius:14px;border:1px solid #24364A;background:#172331;color:#E8EEF5;font:inherit}
 .exsheet .fmt.rec{border-color:#F5B82E;background:#1E2A1C}
@@ -3402,7 +3477,7 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
   ['txt','NMEA','NMEA 0183 WPL / RTE','Plain text sentences for GPS units and older ECDIS / ECS that load routes over the serial (NMEA) port.',nmea,'text/plain'],
   ['kml','KML','KML (Google Earth)','To view the route in Google Earth or share with the office.',kml,'application/vnd.google-earth.kml+xml']];
  function sheet(){if(!ST||!ST.trk)return;const old=document.querySelector('.exsheet');if(old)old.remove();const d=document.createElement('div');d.className='exsheet';
-  d.innerHTML='<div class="box" role="dialog" aria-label="Export route for ECDIS"><h3>Export route for ECDIS<button type="button" aria-label="Close" data-x>×</button></h3><p class="sub">'+esc(ST.exp.title)+' · '+ST.trk.length+' waypoints · '+fmt(ST.total)+' nm</p>'+
+  d.innerHTML='<div class="box" role="dialog" aria-label="Export route for ECDIS"><h3>Export route for ECDIS<button type="button" aria-label="Close" data-x><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></h3><p class="sub">'+esc(ST.exp.title)+' · '+ST.trk.length+' waypoints · '+fmt(ST.total)+' nm</p>'+
    '<div class="opts"><label>Turn radius (nm)<input type="number" step="0.1" min="0" id="exRad" value="'+OPT.rad+'"></label><label>XTD port (nm)<input type="number" step="0.05" min="0" id="exXtd" value="'+OPT.xtd+'"></label><label>XTD stbd (nm)<input type="number" step="0.05" min="0" id="exXtd2" value="'+OPT.xtd+'" disabled></label></div>'+
    FM.map(f=>'<button type="button" class="fmt'+(f[6]?' rec':'')+'" data-f="'+f[0]+'"><span class="ic">'+f[1]+'</span><span><b>'+f[2]+(f[6]?'<span class="tag">RECOMMENDED</span>':'')+'</b><small>'+f[3]+'</small></span></button>').join('')+
    '<p class="note">On the ECDIS: Route planning → Import (RTZ) from USB. After import, run the ECDIS route check (safety contour, XTD corridor, dangers, ENC coverage) and correct every leg before approval. Great-circle legs are already split into rhumb-line legs as in the plan.</p></div>';
@@ -3442,7 +3517,7 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
 .ab-dev{display:flex;gap:12px;align-items:center;margin-bottom:8px}.ab-dev .cap{width:46px;height:46px;border-radius:50%;border:2px solid #F5B82E;color:#F5B82E;display:grid;place-items:center;flex:none}
 .ab-dev small{display:block;color:#93A4B8;font-size:.7rem;letter-spacing:1px}.ab-dev b{font-size:1.1rem}
 .ab-sec p{margin:6px 0;line-height:1.5;font-size:.9rem}.ab-copy{color:#93A4B8;font-size:.75rem!important}
-.ab-links{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.ab-links{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:12px;width:100%;box-sizing:border-box}@media (min-width:640px){.ab-links{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}.ab-links a{box-sizing:border-box;min-width:0;width:100%;min-height:56px}.ab-links a>span{min-width:0;flex:1}.ab-links small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}.ab-links b{line-height:1.25}.ab-links a::after{content:'\203A';color:#5B6F86;font-size:20px;margin-left:auto}.absheet .box{box-sizing:border-box;overflow-x:hidden}.ab-sec{box-sizing:border-box;max-width:100%}
 .ab-links a{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;border:1px solid #2A4058;background:#0E1621;color:#E8EEF5;text-decoration:none}
 .ab-links a svg{width:22px;height:22px;flex:none;color:#F5B82E;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .ab-links b{display:block;font-size:.88rem}.ab-links small{color:#93A4B8;font-size:.72rem}
@@ -3453,7 +3528,7 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
 <script>
 // ===================== About, developer and disclaimer =====================
 (function(){
- const PPV='1.0 (build 124)',MAIL='freeboard.draftsurvey@gmail.com',SITE='https://freeboarddraftsurvey.github.io/',PRIV='https://freeboarddraftsurvey.github.io/privacy-port-to-port.html',YT='https://www.youtube.com/@draftsurvey-freeboard';
+ const PPV='1.0 (build 127)',MAIL='freeboard.draftsurvey@gmail.com',SITE='https://freeboarddraftsurvey.github.io/',PRIV='https://freeboarddraftsurvey.github.io/privacy-port-to-port.html',YT='https://www.youtube.com/@draftsurvey-freeboard';
  const ic=p=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg>';
  const DISC=['Port to Port is a passage planning aid. It is <b>not an ECDIS and not for navigation</b>. It does not replace official ENC or paper charts, sailing directions, routeing guides, Notices to Mariners, or the judgement of the Master and officers.',
   'Routes, distances, ETAs, weather, storm tracks, navigational warnings, load line and ECA areas are approximate and come partly from third-party data that may be late, incomplete or wrong. Check every leg against official charts and publications and the latest official warnings before use.',
@@ -3461,7 +3536,7 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
   'The app is provided "as is", without warranty. <b>The developer is not liable</b> for any loss, damage, delay, injury, claim or dispute arising from its use or from errors in the data or results.'];
  function fb(){const b=['What I was doing:','','What happened / what I expected:','','Ideas or wishes:','','—','Port to Port '+PPV,'Phone: '+navigator.userAgent].join('\n');return 'mailto:'+MAIL+'?subject='+encodeURIComponent('Port to Port feedback ('+PPV+')')+'&body='+encodeURIComponent(b)}
  function about(){const old=document.querySelector('.absheet');if(old)old.remove();const d=document.createElement('div');d.className='exsheet absheet';
-  d.innerHTML='<div class="box" role="dialog" aria-label="About Port to Port"><h3>About<button type="button" aria-label="Close" data-x>×</button></h3>'+
+  d.innerHTML='<div class="box" role="dialog" aria-label="About Port to Port"><h3>About<button type="button" aria-label="Close" data-x><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></h3>'+
   '<div class="ab-head"><div class="lg"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="18" r="2.4"/><circle cx="19" cy="6" r="2.4"/><path d="M7.2 17c5.3-1 3-7.2 9.6-10"/></svg></div><h2>Port to Port</h2><div class="v">Passage planning · version '+PPV+'</div></div>'+
   '<div class="ab-sec">'+[['<circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 18h5a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h7"/>','Route, distance & ETA','Berth to berth with pilot legs, TSS and canals; ETA at any waypoint'],
    ['<path d="M3 8h11a3 3 0 1 0-3-3"/><path d="M3 12h15a3 3 0 1 1-3 3"/><path d="M3 16h7"/>','Weather & storms','Wind, waves, currents, cyclones and lows with Buys Ballot steer'],
@@ -3482,6 +3557,36 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
  // short disclaimer at the end of every plan
  const out=$('out');if(out){const add=()=>{if(!out.querySelector('.hero')||out.querySelector('.ppdisc'))return;const p=document.createElement('p');p.className='ppdisc';p.innerHTML='Planning aid only — not for navigation. Verify on official charts and the latest warnings. The Master remains responsible; the developer is not liable for any loss or claim. <button type="button">About &amp; full disclaimer</button>';p.querySelector('button').onclick=about;out.appendChild(p)};
   new MutationObserver(()=>setTimeout(add,80)).observe(out,{childList:true});add()}
+})();
+</script>
+<script>
+// ===================== Offline weather: "Save for offline" button in the Plan and labels on saved results =====================
+(function(){
+ const O=window.PPOFF;if(!O)return;
+ const savedAt=()=>{try{return +localStorage.getItem('ppSavedAll')||0}catch(e){return 0}};
+ // label the online cards when their result came from the saved copy
+ const mark=()=>{if(Date.now()-O.last>90000)return;['wxRes','tcRes','nwRes'].forEach(id=>{const el=$(id);if(!el||el.querySelector('.ppoffn')||!el.textContent.trim()||/^\s*(Loading|Checking)/.test(el.textContent))return;if(el.dataset.ppAt&&+el.dataset.ppAt>O.last)return;
+   const t=O.seen||+(localStorage.getItem('ppSaved')||0)||Date.now();const n=document.createElement('p');n.className='ppoffn '+O.cls(t);n.innerHTML='📦 <b>Offline</b> — showing the forecast saved on '+O.utc(t)+' ('+O.age(t)+' old). '+(O.cls(t)?'<b>It is getting old: refresh when you have internet.</b>':'Refresh when you have internet.');el.insertBefore(n,el.firstChild)})};
+ {let tm=0;const o2=$('out');if(o2)new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(mark,300)}).observe(o2,{childList:true,subtree:true})}
+ const wait=ms=>new Promise(r=>setTimeout(r,ms));
+ const until=async(id,ms)=>{const t0=Date.now();await wait(600);while(Date.now()-t0<ms){const el=$(id);if(el&&el.textContent.trim()&&!/^\s*(Loading|Checking|Waiting)/.test(el.textContent)&&!/busy|retry|Waiting \d+ s/i.test(el.textContent.slice(0,200)))return true;await wait(1000)}return false};
+ async function saveAll(btn,st){if(!navigator.onLine){st.innerHTML='<span class="err">No internet now. Connect (port Wi-Fi, VSAT or mobile data), then tap again.</span>';return}
+  btn.disabled=true;const step=(n,t)=>{st.innerHTML='<b>'+n+'/5</b> '+t};try{
+   step(1,'Weather and currents on the route…');if($('wxGo')){$('wxGo').click();await until('wxRes',240000)}
+   step(2,'Storms, cyclones and lows near the route…');if($('tcGo')){$('tcGo').click();await until('tcRes',300000)}
+   step(3,'Navigational warnings (NAVAREA)…');if($('nwGo')){$('nwGo').click();await until('nwRes',180000)}
+   step(4,'Live weather map over the whole route (wind, pressure, waves, currents)…');
+   if(window.wxLive&&window.map&&ST&&ST.trk){const back=document.documentElement.className.match(/v-(\w+)/),view=back?back[1]:'plan';try{setView('chart');await wait(700);const b=L.latLngBounds(ST.trk.map(p=>[p.lat,p.lon]));map.fitBounds(b,{padding:[20,20]});await wait(1200);const was=$('wlBar')&&!$('wlBar').hidden;window.PP_SAVEALL=1;wxLive.show(true);await wait(800);await wxLive.load(true);let n=0;while(n++<90&&!(wxLive.G&&wxLive.M&&wxLive.M.at>Date.now()-600000))await wait(1000);if(!was)wxLive.show(false)}catch(e){}window.PP_SAVEALL=0;try{setView(view)}catch(e){}}
+   step(5,'Hurricane tracker…');try{if(window.tcTracker&&tcTracker.icons)await tcTracker.icons(true)}catch(e){}
+   const now=Date.now();try{localStorage.setItem('ppSavedAll',String(now))}catch(e){}
+   st.innerHTML='✅ Saved on this phone at <b>'+O.utc(now)+'</b>. Works offline: weather on route, storms, warnings, live map, report.'}
+  catch(e){st.innerHTML='<span class="err">Stopped: '+esc(e.message)+'. What was downloaded is saved.</span>'}btn.disabled=false;card()}
+ function card(){const onl=$('onl');if(!onl)return;let c=$('ppSaveCard');if(!c){c=document.createElement('div');c.id='ppSaveCard';c.className='onl';onl.insertBefore(c,onl.firstChild)}
+  const t=savedAt();c.innerHTML='<h3><span class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9a4 4 0 0 1 0 9"/><path d="M12 11v8"/><path d="M9 16l3 3l3-3"/></svg></span>Save weather for offline</h3>'+
+   '<p class="bknote" style="margin:0 0 10px">One tap while you have signal (port Wi-Fi, VSAT, mobile data): saves weather, waves and currents on the route, storms and lows with their tracks, NAVAREA warnings and the live weather map for the whole route. At sea without internet they show from the saved copy, with its age. Everything you load online is also saved automatically.</p>'+
+   '<button type="button" class="go" id="ppSaveGo">Save weather for offline</button><p class="bknote" id="ppSaveSt" style="margin:8px 0 0">'+(t?'<span class="ppoffn '+O.cls(t)+'" style="display:block">Last full save: '+O.utc(t)+' ('+O.age(t)+' ago)</span>':'Not saved yet for this phone.')+'</p>';
+  $('ppSaveGo').onclick=()=>saveAll($('ppSaveGo'),$('ppSaveSt'))}
+ const out=$('out');if(out)new MutationObserver(()=>{if($('onl')&&!$('ppSaveCard'))setTimeout(card,50)}).observe(out,{childList:true,subtree:true});
 })();
 </script>
 </body>
