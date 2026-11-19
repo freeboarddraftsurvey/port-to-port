@@ -3342,7 +3342,7 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
   const chk='<div class="chk">'+CH.map(c=>'<label><i></i>'+c+'</label>').join('')+'</div>';
   const sig='<div class="sig">'+['Prepared by — Navigating Officer','Checked by — Chief Officer','Approved by — Master'].map(s=>'<div><span></span>'+s+'<br><small>Name / signature / date</small></div>').join('')+'</div>';
   const p3='<section class="pg">'+mini+sec(5,'Load line zones on passage (ILLC 1966 Annex II)')+llt+sec(6,'Emission control and MARPOL areas')+eca+sec(7,'Ship\'s clock changes')+clkt+sec(8,'Navigational warnings within 60 nm of the route')+nwt+sec(9,'Passage plan check (IMO Res. A.893(21), SOLAS V/34)')+chk+sec(10,'Approval')+sig+
-   '<p class="src" style="margin-top:4mm">Planning aid only. Not for navigation: verify on official ENC/paper charts, sailing directions, routeing guides and current Notices to Mariners. Weather: Open-Meteo (CC BY 4.0); cyclones: GDACS; warnings: SeaLagom / NGA.</p>'+foot(3)+'</section>';
+   '<p class="src" style="margin-top:4mm">Planning aid only. Not for navigation: verify on official ENC/paper charts, sailing directions, routeing guides and current Notices to Mariners. The passage plan and safe navigation remain the responsibility of the Master and officers; the app is provided "as is" and the developer (Capt. Ramil Apio) is not liable for any loss, damage, delay or claim arising from its use. Weather: Open-Meteo (CC BY 4.0); cyclones: GDACS; warnings: SeaLagom / NGA.</p>'+foot(3)+'</section>';
   return '<style>'+CSS+'</style><div class="rp">'+p1+p2_+p3+'</div>'}
  window.exportPrint=async function(){if(!ST||!ST.exp)return;let ship={};try{ship=JSON.parse(localStorage.getItem('rpShip')||'{}')}catch(e){}
   const n=prompt('Vessel name for the report (leave blank to fill by hand):',ship.name||'');if(n===null)return;const v=prompt('Voyage number:',ship.voy||'');if(v===null)return;
@@ -3429,6 +3429,59 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
  // let the phone's file picker show every file (Android hides .rtz / .rt3 when an extension filter is set)
  const inp=$('impFile');if(inp)inp.removeAttribute('accept');
  document.querySelectorAll('label[for="impFile"]').forEach(l=>{if(l.classList.contains('imp'))l.textContent='Import route from ECDIS (RTZ, GPX, KML, CSV, NMEA)';else{const sm=l.querySelector('small');if(sm)sm.textContent='RTZ, GPX, KML, CSV, NMEA'}});
+})();
+</script>
+<style>
+.absheet .box{padding-bottom:26px}
+.ab-head{text-align:center;padding:6px 0 10px}.ab-head .lg{width:64px;height:64px;margin:0 auto 6px;border-radius:18px;background:#22344A;display:grid;place-items:center;color:#F5B82E}
+.ab-head h2{margin:4px 0 2px;font-size:1.35rem}.ab-head .v{color:#93A4B8;font-size:.85rem}
+.ab-sec{background:#172331;border:1px solid #24364A;border-radius:14px;padding:12px 14px;margin:10px 0}
+.ab-row{display:flex;gap:12px;align-items:flex-start;padding:7px 0;border-bottom:1px solid #24364A}.ab-row:last-child{border:0}
+.ab-row svg{width:22px;height:22px;flex:none;color:#F5B82E;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;margin-top:2px}
+.ab-row b{display:block}.ab-row span{color:#93A4B8;font-size:.82rem}
+.ab-dev{display:flex;gap:12px;align-items:center;margin-bottom:8px}.ab-dev .cap{width:46px;height:46px;border-radius:50%;border:2px solid #F5B82E;color:#F5B82E;display:grid;place-items:center;flex:none}
+.ab-dev small{display:block;color:#93A4B8;font-size:.7rem;letter-spacing:1px}.ab-dev b{font-size:1.1rem}
+.ab-sec p{margin:6px 0;line-height:1.5;font-size:.9rem}.ab-copy{color:#93A4B8;font-size:.75rem!important}
+.ab-links{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.ab-links a{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;border:1px solid #2A4058;background:#0E1621;color:#E8EEF5;text-decoration:none}
+.ab-links a svg{width:22px;height:22px;flex:none;color:#F5B82E;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ab-links b{display:block;font-size:.88rem}.ab-links small{color:#93A4B8;font-size:.72rem}
+.ab-warn{border-left:4px solid #E8322E}.ab-warn h4{margin:0 0 6px;font-size:1rem}.ab-warn ul{margin:0;padding-left:18px}.ab-warn li{margin:5px 0;line-height:1.45;font-size:.86rem}
+.ppdisc{margin:18px 0 6px;padding:10px 12px;border-radius:12px;border-left:4px solid #E8322E;background:#172331;color:#93A4B8;font-size:.78rem;line-height:1.45}
+.ppdisc button{background:none;border:0;padding:0;color:#F5B82E;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+</style>
+<script>
+// ===================== About, developer and disclaimer =====================
+(function(){
+ const PPV='1.0 (build 124)',MAIL='freeboard.draftsurvey@gmail.com',SITE='https://freeboarddraftsurvey.github.io/',PRIV='https://freeboarddraftsurvey.github.io/privacy-port-to-port.html',YT='https://www.youtube.com/@draftsurvey-freeboard';
+ const ic=p=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg>';
+ const DISC=['Port to Port is a passage planning aid. It is <b>not an ECDIS and not for navigation</b>. It does not replace official ENC or paper charts, sailing directions, routeing guides, Notices to Mariners, or the judgement of the Master and officers.',
+  'Routes, distances, ETAs, weather, storm tracks, navigational warnings, load line and ECA areas are approximate and come partly from third-party data that may be late, incomplete or wrong. Check every leg against official charts and publications and the latest official warnings before use.',
+  'The passage plan, its approval and the safe navigation of the ship remain the responsibility of the Master and the ship’s officers (SOLAS V/34).',
+  'The app is provided "as is", without warranty. <b>The developer is not liable</b> for any loss, damage, delay, injury, claim or dispute arising from its use or from errors in the data or results.'];
+ function fb(){const b=['What I was doing:','','What happened / what I expected:','','Ideas or wishes:','','—','Port to Port '+PPV,'Phone: '+navigator.userAgent].join('\n');return 'mailto:'+MAIL+'?subject='+encodeURIComponent('Port to Port feedback ('+PPV+')')+'&body='+encodeURIComponent(b)}
+ function about(){const old=document.querySelector('.absheet');if(old)old.remove();const d=document.createElement('div');d.className='exsheet absheet';
+  d.innerHTML='<div class="box" role="dialog" aria-label="About Port to Port"><h3>About<button type="button" aria-label="Close" data-x>×</button></h3>'+
+  '<div class="ab-head"><div class="lg"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="18" r="2.4"/><circle cx="19" cy="6" r="2.4"/><path d="M7.2 17c5.3-1 3-7.2 9.6-10"/></svg></div><h2>Port to Port</h2><div class="v">Passage planning · version '+PPV+'</div></div>'+
+  '<div class="ab-sec">'+[['<circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 18h5a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h7"/>','Route, distance & ETA','Berth to berth with pilot legs, TSS and canals; ETA at any waypoint'],
+   ['<path d="M3 8h11a3 3 0 1 0-3-3"/><path d="M3 12h15a3 3 0 1 1-3 3"/><path d="M3 16h7"/>','Weather & storms','Wind, waves, currents, cyclones and lows with Buys Ballot steer'],
+   ['<path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17h.01"/>','Navigational warnings','NAVAREA warnings near the route with effective and expiry times'],
+   ['<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>','ECDIS & reports','RTZ (IEC 61174), GPX, CSV, NMEA; passage plan PDF']].map(r=>'<div class="ab-row">'+ic(r[0])+'<div><b>'+r[1]+'</b><span>'+r[2]+'</span></div></div>').join('')+'</div>'+
+  '<div class="ab-sec"><div class="ab-dev"><span class="cap"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11c3-3 15-3 18 0l-1.5 3h-15z"/><path d="M6 14h12v2a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><circle cx="12" cy="8" r="1.2"/></svg></span><div><small>DEVELOPER</small><b>Capt. Ramil Apio</b></div></div>'+
+   '<p>Your phone already keeps you connected to home. Now let it work for you too.</p><p><b style="color:#F5B82E">Port to Port</b> — berth-to-berth passage planning, weather, storms, navigational warnings and ECDIS route files.</p><p>Built by a ship master, for the bridge team. Because at sea, a good plan is a safe voyage.</p>'+
+   '<p class="ab-copy">© 2026 Ramil Apio. All rights reserved. Port to Port™ and Freeboard™, their code, design and logo may not be copied, modified or published without written permission.</p>'+
+   '<div class="ab-links"><a href="'+SITE+'" target="_blank" rel="noopener">'+ic('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3Z"/>')+'<span><b>Website</b><small>Freeboard apps</small></span></a>'+
+   '<a href="'+PRIV+'" target="_blank" rel="noopener">'+ic('<path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.2 7.5 9.5 4.4-1.3 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/>')+'<span><b>Privacy policy</b><small>No data collected</small></span></a>'+
+   '<a href="'+fb()+'">'+ic('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>')+'<span><b>Send feedback</b><small>'+MAIL+'</small></span></a>'+
+   '<a href="'+YT+'" target="_blank" rel="noopener">'+ic('<rect x="2.5" y="5" width="19" height="14" rx="4"/><path d="M10 9v6l5-3z"/>')+'<span><b>YouTube</b><small>How-to videos</small></span></a></div></div>'+
+  '<div class="ab-sec ab-warn"><h4>Important — please read</h4><ul>'+DISC.map(x=>'<li>'+x+'</li>').join('')+'</ul></div></div>';
+  document.body.appendChild(d);d.addEventListener('click',e=>{if(e.target===d||e.target.closest('[data-x]'))d.remove()});const m=$('menu');if(m)m.hidden=true}
+ window.ppAbout=about;
+ // menu entry
+ const menu=$('menu');if(menu&&!$('miAbout')){menu.insertAdjacentHTML('beforeend','<button type="button" class="mi" id="miAbout"><svg class="mic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11c3-3 15-3 18 0l-1.5 3h-15z"/><path d="M6 14h12v2a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/></svg><span>About, developer and disclaimer<small>Capt. Ramil Apio · version '+PPV+'</small></span></button>');$('miAbout').onclick=about}
+ // short disclaimer at the end of every plan
+ const out=$('out');if(out){const add=()=>{if(!out.querySelector('.hero')||out.querySelector('.ppdisc'))return;const p=document.createElement('p');p.className='ppdisc';p.innerHTML='Planning aid only — not for navigation. Verify on official charts and the latest warnings. The Master remains responsible; the developer is not liable for any loss or claim. <button type="button">About &amp; full disclaimer</button>';p.querySelector('button').onclick=about;out.appendChild(p)};
+  new MutationObserver(()=>setTimeout(add,80)).observe(out,{childList:true});add()}
 })();
 </script>
 </body>
