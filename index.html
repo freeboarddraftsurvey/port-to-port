@@ -227,7 +227,7 @@ form{background:var(--card);border:1px solid var(--line);border-radius:16px;marg
 .v-eta #mapwrap,.v-eta #recent,.v-eta .ac,.v-eta form>.field,.v-eta .checks,.v-eta .grp-route,.v-eta #alts,.v-eta .dist,.v-eta .zones,.v-eta .tools,.v-eta .wpwrap,.v-eta ol.plan,.v-eta #ports,.v-eta .portcard,.v-eta .gorow,.v-eta .landchk,.v-eta .err{display:none!important}
 .v-plan #mapwrap,.v-plan #recent,.v-plan form,.v-plan #alts,.v-plan .fuel.eta,.v-plan .clkwrap,.v-plan ol.clk,.v-plan #ports,.v-plan .portcard,.v-plan .wpwrap{display:none!important}
 .v-ports #mapwrap,.v-ports #recent,.v-ports form,.v-ports #out>*:not(#ports):not(.portcard){display:none!important}
-.v-ports #ports,.v-ports .portcard{display:block!important}
+.v-ports #ports,.v-ports .portcard{display:block!important}.v-ports .portcard form.posform{display:block!important}.pform .posform label.pl{width:auto;display:block;margin:0 0 10px;font-size:.92rem;color:var(--muted)}.pform .posform textarea{display:block;width:100%;box-sizing:border-box;margin-top:4px;font:inherit;font-size:1rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px;resize:vertical}
 .v-chart .fbh,.v-chart .menu,.v-chart main,.v-chart .fbnav,.v-chart .worldpack,.v-chart .openchart{display:none!important}
 .v-chart #mapwrap{position:fixed;inset:0;max-width:none;z-index:2000;background:var(--sea)}
 .v-chart #map{position:absolute!important;inset:0;height:auto!important;margin:0!important;border-radius:0;border:0!important}
@@ -496,6 +496,7 @@ html.eta-route .v-eta form>.field,html.eta-route .v-eta form .checks,html.eta-ro
 .adv{border-radius:8px;padding:6px 8px;margin:6px 0;font-size:12px;background:#E9F7EF;border-left:4px solid #2E9D5B;color:#1d2a3a}.adv.s2{background:#FFF3E0;border-left-color:#F2A33C}.adv.s3{background:#FFE6E4;border-left-color:#D93025}.adv ul{margin:4px 0 0;padding-left:16px}.adv li{margin:2px 0}
 .lowtb tr.best td{background:#E3F6EA}details>summary{cursor:pointer;font-weight:700;font-size:12px;margin:4px 0}
 .stlbl.ev span{color:#FF9F43}
+#out .lowtb th{color:#93A4B8;border-bottom-color:#2A4058}#out .lowtb td{color:inherit;border-bottom-color:#24364A}#out .lowtb tr.best td{background:#173D2A;color:#D9F7E8}
 /* Leaflet core (inlined) */
 .leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer{position:absolute;left:0;top:0}
 .leaflet-container{overflow:hidden;-webkit-tap-highlight-color:transparent;outline-offset:1px;font-family:inherit}
@@ -3155,7 +3156,7 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
 </script>
 <style>
 /* ---- Plan section: professional layout ---- */
-.psx,#out .psx,#out .tools.tgrid.psx,#out .wptoggle.psx{display:none!important}
+.v-plan .psx,.v-plan #out .psx,.v-plan #out .tools.tgrid.psx,.v-plan #out .wptoggle.psx{display:none!important}
 #out.ptabs .psec{margin-top:6px}
 .psum{margin:12px 0 4px}.pshead{font:800 .72rem/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:4px 0 8px}
 .psgrid{display:grid;grid-template-columns:1fr;gap:8px}
@@ -3236,7 +3237,7 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
  // ---- one section at a time: the icon bar works as tabs
  function assign(out){let cur='summary';for(const c of out.children){if(c.classList.contains('pnav'))continue;const tx=c.classList.contains('psec')?c.textContent:'';
    if(c.classList.contains('psec')){cur=/^Passage/.test(tx)?'passage':/^Route tools/.test(tx)?'tools':/^Waypoints/.test(tx)?'wps':/^Load line/.test(tx)?'loadline':/^Ports/.test(tx)?'ports':/^Voyage/.test(tx)?'none':cur}
-   let k=cur;if(c.matches('.hero,.total,.meta,.badge,#alts,.gorow,table.eta,.landchk,.psum'))k='summary';if(c.id==='ports'||c.classList.contains('portcard'))k='ports';if(c.id==='onl')k='onl';if(c.matches('.ppdisc,#offMsg,.err'))k='all';if(c.classList.contains('psec')&&/^Voyage/.test(tx))k='none';
+   let k=cur;if(c.matches('.hero,.total,.meta,.badge,#alts,.gorow,table.eta,.landchk,.psum'))k='summary';if(c.id==='ports'||c.classList.contains('portcard'))k='ports';if(c.id==='onl')k='onl';if(c.matches('.ppdisc,#offMsg,.err,.hlprow'))k='all';if(c.classList.contains('psec')&&/^Voyage/.test(tx))k='none';
    c.dataset.pst=k}
   const onl=$('onl');if(onl)for(const d of onl.children){d.dataset.pst=d.id==='ppSaveCard'?'off':d.id==='vpCard'?'pos':d.querySelector('#wxGo')?'wx':d.querySelector('#tcGo')?'storm':d.querySelector('#nwGo')?'warn':'pos'}}
  function apply(out){const t=TAB;out.classList.add('ptabs');for(const c of out.children){if(c.classList.contains('pnav'))continue;const k=c.dataset.pst;const show=k==='all'||k===t||(k==='onl'&&['pos','wx','storm','warn','off'].includes(t));c.classList.toggle('psx',!show)}
@@ -3528,7 +3529,7 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
 <script>
 // ===================== About, developer and disclaimer =====================
 (function(){
- const PPV='1.0 (build 127)',MAIL='freeboard.draftsurvey@gmail.com',SITE='https://freeboarddraftsurvey.github.io/',PRIV='https://freeboarddraftsurvey.github.io/privacy-port-to-port.html',YT='https://www.youtube.com/@draftsurvey-freeboard';
+ const PPV='1.0 (build 133)',MAIL='freeboard.draftsurvey@gmail.com',SITE='https://freeboarddraftsurvey.github.io/',PRIV='https://freeboarddraftsurvey.github.io/privacy-port-to-port.html',YT='https://www.youtube.com/@draftsurvey-freeboard';
  const ic=p=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg>';
  const DISC=['Port to Port is a passage planning aid. It is <b>not an ECDIS and not for navigation</b>. It does not replace official ENC or paper charts, sailing directions, routeing guides, Notices to Mariners, or the judgement of the Master and officers.',
   'Routes, distances, ETAs, weather, storm tracks, navigational warnings, load line and ECA areas are approximate and come partly from third-party data that may be late, incomplete or wrong. Check every leg against official charts and publications and the latest official warnings before use.',
@@ -3587,6 +3588,149 @@ function drawLLChart(cv,W){const H=Math.round(W*0.5),x=cv.getContext('2d');cv.wi
    '<button type="button" class="go" id="ppSaveGo">Save weather for offline</button><p class="bknote" id="ppSaveSt" style="margin:8px 0 0">'+(t?'<span class="ppoffn '+O.cls(t)+'" style="display:block">Last full save: '+O.utc(t)+' ('+O.age(t)+' ago)</span>':'Not saved yet for this phone.')+'</p>';
   $('ppSaveGo').onclick=()=>saveAll($('ppSaveGo'),$('ppSaveSt'))}
  const out=$('out');if(out)new MutationObserver(()=>{if($('onl')&&!$('ppSaveCard'))setTimeout(card,50)}).observe(out,{childList:true,subtree:true});
+})();
+</script>
+<style>
+.hlpfab{position:fixed;right:14px;bottom:calc(98px + env(safe-area-inset-bottom));z-index:1500;width:46px;height:46px;border-radius:50%;border:1px solid #2A4058;background:#1E2C3D;color:#F5B82E;display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,0,0,.45);padding:0}
+.hlpfab svg{width:24px;height:24px}.v-chart .hlpfab{display:none}
+.hlprow{display:flex;align-items:center;gap:10px;width:100%;margin:2px 0 10px;padding:9px 12px;border-radius:12px;border:1px dashed #2A4058;background:transparent;color:#C9D6E3;font:inherit;font-size:.86rem;text-align:left}
+.hlprow svg{width:20px;height:20px;color:#F5B82E;flex:none}.hlprow b{color:#E8EEF5}.hlprow .hchev{margin-left:auto;color:#5B6F86;font-size:18px}
+.hlp .intro{color:#C9D6E3;line-height:1.5;font-size:.92rem;margin:4px 0 12px}
+.hlp .vid{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;border:1px solid #24364A;background:#0E1621;color:#E8EEF5;text-decoration:none;margin:0 0 12px}
+.hlp .vid .yt{width:44px;height:30px;border-radius:8px;background:#E62117;display:grid;place-items:center;flex:none}.hlp .vid.soon .yt{background:#3A4656}
+.hlp .vid b{display:block;font-size:.92rem}.hlp .vid small{color:#93A4B8;font-size:.76rem}
+.hlp h4{margin:16px 0 6px;font-size:.98rem;color:#F5B82E}
+.hlp ol{margin:0;padding-left:20px}.hlp li{margin:5px 0;line-height:1.45;font-size:.88rem;color:#DCE6F0}
+.hlp .ex{margin:14px 0 4px;padding:10px 12px;border-radius:12px;background:#132A1F;border-left:4px solid #2E9D5B}.hlp .ex h4{color:#7DF0B4;margin-top:0}
+.hlp .tip{margin:12px 0 0;padding:10px 12px;border-radius:12px;background:#2A2410;border-left:4px solid #F2B33D;font-size:.85rem;line-height:1.45;color:#FFE7BF}
+.hlpidx button{display:flex;align-items:center;gap:12px;width:100%;padding:11px 6px;border:0;border-bottom:1px solid #24364A;background:none;color:#E8EEF5;text-align:left;font:inherit}
+.hlpidx .pi{width:36px;height:36px;flex:0 0 36px;border-radius:11px;background:#22344A;display:grid;place-items:center;color:#F5B82E}.hlpidx .pi svg{width:19px;height:19px}
+.hlpidx b{display:block;font-size:.95rem}.hlpidx small{display:block;color:#93A4B8;font-size:.76rem;line-height:1.3}.hlpidx .hchev{margin-left:auto;color:#5B6F86}.hlpidx .yt{font-size:.66rem;font-weight:800;color:#fff;background:#E62117;border-radius:6px;padding:1px 5px;margin-left:6px;vertical-align:1px}
+</style>
+<script>
+// ===================== Help: tutorial for every section, with a worked example and a how-to video =====================
+(function(){
+ const CH='https://www.youtube.com/@draftsurvey-freeboard';
+ // put each YouTube link here when the video is ready, e.g. route:'https://youtu.be/xxxx'
+ const VID={route:'https://youtu.be/7d-8-TWm2es',chart:'https://youtu.be/7d-8-TWm2es',eta:'https://youtu.be/BgIJISY0DJU',ports:'https://youtu.be/crLsQY_0XOI',bunker:'https://youtu.be/5HCYbKwqTO4',summary:'https://youtu.be/7d-8-TWm2es',passage:'https://youtu.be/7d-8-TWm2es',wps:'https://youtu.be/7d-8-TWm2es',tools:'https://youtu.be/q0Sxomb48vI',ecdis:'https://youtu.be/UXOm3hlnxlE',loadline:'https://youtu.be/eontqTz28HE',pos:'https://youtu.be/t2t5U4PG9mI',wx:'https://youtu.be/EovYLsAuVYQ',storm:'https://youtu.be/EovYLsAuVYQ',warn:'https://youtu.be/6S-SkgFeV7c',off:'https://youtu.be/PZtyRjoB5EM',report:'https://youtu.be/q0Sxomb48vI'};
+ const I={route:'<circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 18h5a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h7"/>',chart:'<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>',eta:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>',
+  ports:'<circle cx="12" cy="5" r="2"/><path d="M12 7v14"/><path d="M5 13a7 7 0 0 0 14 0"/><path d="M8 11h8"/>',bunker:'<path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M3 21h13M7 7h5v4H7z"/><path d="M15 9h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V8l-3-3"/>',
+  summary:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15l4-5l3 3l5-6"/>',passage:'<path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>',wps:'<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h5a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h5"/>',
+  tools:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',ecdis:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',report:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 15h6M9 18h3"/>',
+  loadline:'<circle cx="12" cy="12" r="6"/><path d="M3 12h18"/>',pos:'<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',wx:'<path d="M3 8h11a3 3 0 1 0-3-3"/><path d="M3 12h15a3 3 0 1 1-3 3"/><path d="M3 16h7"/>',
+  storm:'<circle cx="12" cy="12" r="3"/><path d="M13 9c0-3 2-5 6-5c-2 1-3 2-3 5"/><path d="M11 15c0 3-2 5-6 5c2-1 3-2 3-5"/>',warn:'<path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17h.01"/>',off:'<path d="M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9a4 4 0 0 1 0 9"/><path d="M12 11v8"/><path d="M9 16l3 3l3-3"/>',
+  q:'<circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.2a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.4-2.7 4.1"/><path d="M12 17.6h.01"/>'};
+ const sv=k=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(I[k]||I.q)+'</svg>';
+ const T={
+ route:{t:'Plan a route port to port',i:'Make a berth-to-berth sea route between any two ports: distance, steaming time, ETA, canals and straits, with the route options to compare.',
+  s:[['Choose the ports',['Type the departure port in From and pick it from the list. Do the same for To.','Need a call on the way? Add it with Via (passage or port). Use Avoid Suez / Avoid Panama to compare the long way round.','Tick Berth and pilot legs to include the slow legs between the berth and the pilot station.']],
+   ['Speed and departure',['Enter the sea speed in knots (pilot legs use their own slower speed).','Set Departure from berth in port local time. The app converts to UTC and to each port’s time zone, including daylight saving.']],
+   ['Calculate',['Tap Calculate route. The route appears on the Chart and the figures in Plan.','If Route options show more than one way, compare distance, days, ECA miles and fuel cost, then pick one. The master decides.','Tap Share route link to send the same route to another phone.']]],
+  ex:['Manila → Singapore, 12 kn, departure 19 Nov 18:00 LT.','Result: 1,361 nm berth to berth, 4 d 17 h, ETA Singapore PWBGA about 24 Nov 04:42 LT.','Plan → Passage shows berth-to-pilot 6 nm at 8 kn, sea passage 1,355 nm at 12 kn.'],
+  tip:'Routes follow the main shipping lanes and TSS. Always check every leg on the official ENC before use.'},
+ chart:{t:'Chart and layers',i:'See the route on the chart with weather, storms, warnings, traffic schemes, depths and port information. Everything is switched on and off in the layers panel.',
+  s:[['Move around',['Pinch to zoom, drag to pan. Tap a waypoint dot for its course, distance, ETA in UTC and ship time, and any bad weather expected there.','The yellow back arrow returns to the screen you came from.']],
+   ['Layers panel',['Tap the yellow layers button (top right). Tap a tile to switch a layer on or off: ENC/sea chart, depths, TSS, ECA areas, load line zones, NAVAREA warnings, storms.','Live weather: wind particles, isobars with H and L, waves or currents. Use ▶ to animate the forecast and the slider to choose the hour; ⚙ for speed, units and layers.']],
+   ['Offline charts',['Menu ☰ → Offline areas and overlays: download the chart around your route while you have internet. Saved areas work at sea.']]],
+  ex:['Open the chart after calculating Manila → Singapore.','Layers → Live weather → choose Waves. Drag the slider to Fri 06Z to see the sea along the route on that day.','Tap waypoint 3 to read: course 236°, ETA 20 Nov 23:00 UTC, wind Bft 6.'],
+  tip:'Model weather is guidance only. Use official forecasts (NAVTEX, SafetyNET, weather fax) for decisions.'},
+ eta:{t:'ETA calculator',i:'Work out an ETA from distance and speed, the speed needed for a required arrival time, or the ETA at any waypoint of your route, with ship’s time and clock changes.',
+  s:[['ETA',['Choose ETA (top). Set the start date and time and its time zone (port, UTC, phone or ship’s position).','Distance from: Current route, then pick From waypoint and To waypoint. Or enter the distance by hand.','Enter the speed (or tap a speed chip) and tap Calculate ETA.']],
+   ['Results',['ETA in the arrival time zone and in UTC, steaming time, and a table with the ETA at every waypoint in UTC and local time.','Speed variations ±5 kn show how the ETA moves with speed.','The ship’s clock card shows each clock change on the way (retard westbound, advance eastbound).']],
+   ['Required speed',['Choose Required speed, set the start time and the required arrival time. The app gives the speed needed and the ETA at each waypoint at that speed.']]],
+  ex:['From waypoint 0 Manila (19 Nov 22:27 LT) to waypoint 4 GC 4, 764 nm at 12 kn.','ETA at GC 4: Sat 21 Nov 13:05 ship’s time UTC+7 = 06:05 UTC, steaming 2 d 15 h 39 min.','Required speed to be there by 21 Nov 00:00 UTC: about 13.2 kn.'],
+  tip:'This calculator uses one speed for the whole distance. The Plan uses slower speeds on the pilot legs, so the two can differ a little.'},
+ ports:{t:'Ports',i:'Port details for the ports on your route: position, time zone, pilot boarding, berths, channel and buoys from open sea charts, and your own notes.',
+  s:[['Port cards',['Each port of the route has a card. Tap it to open: country, UN/LOCODE, position, local time and daylight saving.','Pilot boarding, berths nearby and channel buoys come from OpenSeaMap/OpenStreetMap when available (needs internet once).']],
+   ['Your port info',['Add your own notes for the port (agent, VHF channel, anchorage, restrictions). They stay on this phone.']]],
+  ex:['Singapore PWBGA: position, UTC+8, pilot boarding ground, and your note “Report to VTIS East on Ch 10 two hours before”.'],
+  tip:'Always confirm pilot and port details with the agent, the port guide and the sailing directions.'},
+ bunker:{t:'Bunker calculation',i:'Estimate the fuel for the voyage: VLSFO and LSMGO at sea and in port, ECA change-over, ROB on arrival and delivery / redelivery figures.',
+  s:[['Set up',['Enter ROB at departure for VLSFO and LSMGO.','Open Charterer speed and consumption and enter the speeds and daily consumptions (ballast, laden, eco).','Enter port consumption: generators working and idle, boiler, cold-climate extra, incinerator.']],
+   ['Voyage legs and port stays',['Each leg of the calculated route is listed with its sea days. Choose the speed profile for each leg and add port days.','Legs inside an ECA burn LSMGO 0.10% S automatically.']],
+   ['Results',['ROB on arrival for each fuel, total consumed, and the cost when prices are set. Use Copy or Excel to send it.']]],
+  ex:['VLSFO ROB 850 mt, LSMGO 120 mt. Laden 12 kn at 28 mt/day VLSFO.','4.7 sea days → about 132 mt VLSFO; port 2 days → about 8 mt. ROB arrival about 710 mt VLSFO.'],
+  tip:'Consumption figures are estimates. Check with the chief engineer and the charter party warranties.'},
+ summary:{t:'Plan · Summary',i:'The first page of the plan: distance, ETA and ECA miles at a glance, with one line for every section of the plan.',
+  s:[['Use it',['Read the route box: total distance, ETA in port local time, SECA and HRA miles, steaming time.','Tap any line (Passage plan, Waypoints, Weather, Storms…) to open that section. The icon bar at the top does the same.','Departure berth / pilot and Arrival berth buttons show the harbour legs on the chart.']]],
+  ex:['Summary shows 1,361 nm, ETA 24 Nov 04:42, Storms “Tap to check”. Tap Storms → Check storms on route.']},
+ passage:{t:'Plan · Passage',i:'The passage in legs: berth to pilot, sea passage and pilot to berth, with distance, time and speed, plus the miles inside SECA, food-waste zones and other special areas.',
+  s:[['Read the tables',['Passage plan: each leg with its distance, time and speed, and the berth-to-berth total.','Distance table: miles and steaming time inside and outside SECA, MARPOL food-waste zones and special areas, with the fuel to use.']],
+   ['Ship’s clock',['Show ship’s clock and Date Line lists every clock change on the route with position, date and time.']]],
+  ex:['Inside SECA 0 nm, outside 1,361 nm on VLSFO 0.50%. Food waste: no discharge for 36 nm near land.']},
+ wps:{t:'Plan · Waypoints and editing',i:'Every waypoint with position, course, distance, ETA in UTC and ship time. You can move, add and delete waypoints and save the route as your own.',
+  s:[['Waypoint list',['Each waypoint shows latitude and longitude, course and distance to the next, total distance and ETA.','Tap a waypoint on the chart for the same details plus the weather expected when you pass it.']],
+   ['Edit the route',['Tools → Edit route. Drag a waypoint, tap a leg to add one, or tap a waypoint and Delete.','Tap Done editing. The land check runs again; legs over land are shown in red.','Save as my route keeps it for next time. Use recommended goes back to the app’s route.']]],
+  ex:['Move WP 3 five miles south to keep clear of a fishing area, then Done editing: the distance grows by 0.8 nm and the ETAs update.']},
+ tools:{t:'Plan · Tools and export',i:'Everything you can do with the plan: edit, copy, Excel, PDF passage plan, share, ECDIS export and import, and offline charts.',
+  s:[['The tiles',['Edit route / Use recommended: change the waypoints or go back.','Copy list: the waypoint list as text for email or chat. Excel: the full plan as a workbook.','PDF / Print: the professional passage plan report (see “Passage plan PDF”).','ECDIS export / import: route files for the ECDIS (see “ECDIS route files”). Offline charts: save the chart for sea.']]],
+  ex:['Tools → Excel → send the workbook to the office; Tools → ECDIS export → RTZ to the bridge ECDIS by USB.']},
+ report:{t:'Passage plan PDF report',i:'A three-part passage plan in A4: route chart, waypoint schedule, noon weather forecast, storm tracks against your waypoints with wind and swell arrows, load line zones, ECA, NAVAREA warnings, checklist and signatures.',
+  s:[['Before printing',['With internet: run Check storms on route and Load navigational warnings so they are included.','The noon weather is loaded automatically when you print (or from the saved copy when offline).']],
+   ['Print',['Tools → PDF / Print. Enter the vessel name and voyage number (remembered for next time).','In the print screen choose Save as PDF, paper A4. Sign the printed copy: navigating officer, chief officer, master.']]],
+  ex:['Part 2 shows mark 3: storm centre 77 nm from the ship on 19 Nov 23:56 UTC, wind at ship from 085° Bft 9, Buys Ballot centre 197° “agrees”.']},
+ ecdis:{t:'ECDIS route files',i:'Send the route to any type-approved ECDIS with the standard RTZ file (IEC 61174), or use GPX, CSV, NMEA or KML. You can also import a route from the ECDIS.',
+  s:[['Export',['Tools → ECDIS export. Set the turn radius and XTD, then tap RTZ (recommended).','Copy the file to a USB stick. On the ECDIS: Route planning → Import route (RTZ).','Run the ECDIS route check (safety contour, XTD corridor, dangers) and correct the legs before approval.']],
+   ['Import',['Tools → ECDIS import (or menu ☰ → Import route from ECDIS). Choose an RTZ, GPX, KML, CSV or NMEA file.','The route opens in the app; check it, then Edit route → Save as my route.']]],
+  ex:['Tianjin → Vancouver, 51 waypoints, radius 0.5 nm, XTD 0.2 nm → file Route_Tianjin_Pt_to_Vancouver.rtz.']},
+ loadline:{t:'Plan · Load line zones',i:'The load line zones and seasonal areas crossed on the passage (ILLC 1966 Annex II), with the date you enter each zone.',
+  s:[['Read the table',['Each row: zone or area, from which position, the date (UTC) and the seasonal period.','Ships 100 m and under may have a different zone in some areas; it is shown separately.','Check the zone at the deepest point of the voyage before loading.']]],
+  ex:['Manila → Singapore: Tropical zone all the way; load to the Tropical mark.'],
+  tip:'Boundaries are simplified. Check the Load Line chart and the ship’s certificate.'},
+ pos:{t:'Plan · Vessel position',i:'Update the ship’s position and time during the voyage. Weather, storm and warning checks then use only the remaining route, from where you really are.',
+  s:[['Update',['Enter latitude and longitude (or tap Use phone GPS) and the date and time UTC (or Now).','Tap Update position and time. The app snaps the position to the route and recalculates the ETAs from there.','Clear the position to go back to the planned departure.']]],
+  ex:['Ten days into the voyage: 35°12′N 158°40′E at 05 Dec 06:00 UTC → remaining 2,310 nm, new ETA Vancouver 13 Dec 18:20 LT. Then Check storms on route for the remaining part.']},
+ wx:{t:'Plan · Weather and currents on route',i:'Forecast wind, waves, swell and current at each point of the route at the time the ship is expected there, and the ETA corrected for current.',
+  s:[['Load',['Tap Load weather & currents (internet, or the saved copy offline).','Strongest wind and highest waves on the route are shown first, then a table: position, time UTC, distance, wind, waves, current set and drift, along-track current.']],
+   ['On the chart',['Wind on route draws coloured cells and arrows; tap a waypoint for the weather when you pass it.']]],
+  ex:['Strongest wind 52 kn and waves 5.2 m on 20 Nov 18Z near 12°N 116°E: plan a slower speed or a deviation.'],
+  tip:'Forecast up to 16 days (waves 8 days). Beyond 3–5 days use it only as a trend.'},
+ storm:{t:'Plan · Storms and Buys Ballot',i:'Tropical cyclones (GDACS) and deep lows near the route, with forecast track, cone, dangerous and navigable semicircles, closest approach and a suggested steer for a laden bulk carrier.',
+  s:[['Check',['Tap Check storms on route. Each system near the route shows its class, centre, movement, closest approach (CPA) time and distance, and the wind, waves and swell expected at the ship.','On the chart: white dotted forecast path with dates, shadow cone, red/green semicircles, ship icon at CPA with the suggested steer.']],
+   ['Decide',['Ride it out (Bft ≤ 7): keep the route, ease away up to 20°.','Heavy weather (Bft 8–9 / Hs 4–6 m): sea 20–40° on the bow at reduced speed; avoid beam and stern-quartering seas (IMO MSC.1/Circ.1228).','Dangerous (Bft ≥ 10, Hs ≥ 6 m, typhoon near): do not ride through. Use the speed and waiting options, evade by the semicircle rule, turn back or shelter. Report under SOLAS V/31.']],
+   ['Buys Ballot',['Face the wind: in the northern hemisphere the centre is about 112° to your right (left in the south). Compare with the forecast track; if they differ by more than 60° be careful.']]],
+  ex:['Typhoon TESTSTORM moving 250° at 5 kn; CPA 28 nm on 19 Nov 14Z, ship in the DANGEROUS semicircle. Options: speed up +2 kn gives 41 nm; wait 24 h gives 210 nm ✔ — the master chooses wait/drift clear of the track.'],
+  tip:'Model tracks for lows are estimates. Always follow the official warning (JTWC, JMA, PAGASA, NHC) and re-check every 6 hours.'},
+ warn:{t:'Plan · NAVAREA warnings',i:'Navigational warnings within 60 nm of your route, with the area drawn on the chart and the effective and expiry date and time.',
+  s:[['Load',['Tap Load navigational warnings. The app reads the NAVAREA warnings (SeaLagom / NGA copy) for the areas the route crosses.','Each warning: number, distance from the route, effective and expiry time, and the text.']],
+   ['Paste your own',['Paste any NAVAREA, NAVTEX or SafetyNET text in the box and tap Check: positions are found and plotted.']]],
+  ex:['NAVAREA XI 1251/26: survey in the Singapore Strait eastbound lane, 18 Nov 00Z to 22 Nov 2359Z, 2 nm from the route — plotted as a dashed area on the chart.'],
+  tip:'Always check the latest NAVTEX and SafetyNET on the bridge receiver; the app’s copy may be some hours old.'},
+ off:{t:'Plan · Offline save',i:'Save the weather, storms, warnings and the live weather map for the whole route while you have signal, and use them at sea without internet.',
+  s:[['Save',['With internet (port Wi-Fi, VSAT, mobile data) tap Save weather for offline. Five steps run: weather on route, storms, NAVAREA, live weather map for the route, hurricane tracker.','Everything you load online is also saved automatically.']],
+   ['At sea',['Use the same buttons. Results show a label “Offline — saved forecast … (x h old)”: green when fresh, orange after 24 h, red after 48 h.','Saved data is kept for 14 days.']]],
+  ex:['Saved at Manila anchorage 19 Nov 02:55 UTC; two days later at sea the storm check still shows the typhoon track with the label “46 h old” — refresh at the next VSAT window.']}
+ };
+ const ORDER=['route','chart','eta','summary','passage','wps','tools','report','ecdis','loadline','pos','wx','storm','warn','off','ports','bunker'];
+ function vid(k){const u=VID[k];return u?'<a class="vid" href="'+u+'" target="_blank" rel="noopener"><span class="yt"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span><span><b>Watch the video</b><small>How-to on YouTube (needs internet)</small></span></a>'
+  :'<a class="vid soon" href="'+CH+'" target="_blank" rel="noopener"><span class="yt"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span><span><b>Video coming soon</b><small>Subscribe on YouTube to see it first</small></span></a>'}
+ function sheet(html,label){const old=document.querySelector('.hlpsheet');if(old)old.remove();const d=document.createElement('div');d.className='exsheet hlpsheet';
+  d.innerHTML='<div class="box hlp" role="dialog" aria-label="'+label+'">'+html+'</div>';document.body.appendChild(d);d.addEventListener('click',e=>{if(e.target===d||e.target.closest('[data-x]'))d.remove();const b=e.target.closest('[data-hk]');if(b)topic(b.dataset.hk);if(e.target.closest('[data-idx]'))index()});const m=$('menu');if(m)m.hidden=true}
+ const X='<button type="button" aria-label="Close" data-x><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
+ function topic(k){const t=T[k]||T.route;let h='<h3><span style="color:#F5B82E;display:inline-grid">'+sv(k)+'</span>'+t.t+X+'</h3><p class="intro">'+t.i+'</p>'+vid(k);
+  t.s.forEach(([hh,st])=>{h+='<h4>'+hh+'</h4><ol>'+st.map(x=>'<li>'+x+'</li>').join('')+'</ol>'});
+  if(t.ex)h+='<div class="ex"><h4>Worked example</h4><ol>'+t.ex.map(x=>'<li>'+x+'</li>').join('')+'</ol></div>';
+  if(t.tip)h+='<p class="tip">💡 '+t.tip+'</p>';
+  h+='<button type="button" class="hlprow" data-idx style="margin-top:14px">'+sv('passage')+'<span><b>User manual</b> · all tutorials</span><span class="hchev">›</span></button>';
+  sheet(h,t.t+' help');const b=document.querySelector('.hlpsheet .box');if(b)b.scrollTop=0}
+ function index(){let h='<h3>User manual'+X+'</h3><p class="intro">Every screen explained in plain English, with a worked example and a how-to video.</p><a class="vid" href="'+CH+'" target="_blank" rel="noopener"><span class="yt"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span><span><b>Freeboard on YouTube</b><small>@DraftSurvey-Freeboard · how-to videos</small></span></a><div class="hlpidx">'+
+  ORDER.map(k=>'<button type="button" data-hk="'+k+'"><span class="pi">'+sv(k)+'</span><span><b>'+T[k].t+(VID[k]?'<span class="yt">VIDEO</span>':'')+'</b><small>'+T[k].i.slice(0,82)+(T[k].i.length>82?'…':'')+'</small></span><span class="hchev">›</span></button>').join('')+'</div>';sheet(h,'User manual')}
+ window.ppHelp=topic;window.ppManual=index;
+ // which topic fits the screen now
+ function current(){const c=document.body.className;const v=(c.match(/v-(\w+)/)||[])[1]||'route';if(v==='plan'){let t='summary';try{t=localStorage.getItem('planTab')||'summary'}catch(e){}return T[t]?t:'summary'}return T[v]?v:'route'}
+ // floating help button
+ const fab=document.createElement('button');fab.type='button';fab.className='hlpfab';fab.setAttribute('aria-label','Help for this screen');fab.innerHTML=sv('q');fab.onclick=()=>topic(current());document.body.appendChild(fab);
+ // menu entry
+ const menu=$('menu');if(menu&&!$('miHelp')){const a=document.createElement('button');a.type='button';a.className='mi';a.id='miHelp';a.innerHTML='<svg class="mic" viewBox="0 0 24 24" aria-hidden="true">'+I.q+'</svg><span>User manual and tutorials<small>Every screen, with examples and videos</small></span>';a.onclick=index;menu.insertBefore(a,menu.firstChild)}
+ // chart: a help row at the top of the layers panel
+ const ct=$('chartTools');if(ct&&!ct.querySelector('.hlprow')){const r=document.createElement('button');r.type='button';r.className='hlprow';r.innerHTML=sv('q')+'<span><b>How to use the chart</b> · tutorial & video</span><span class="hchev">›</span>';r.onclick=()=>topic('chart');ct.insertBefore(r,ct.firstChild)}
+ // plan: a help row at the top of each section
+ const out=$('out');if(out){let tm=0;const add=()=>{if(!out.querySelector('.pnav'))return;const k=current();let r=out.querySelector(':scope > .hlprow');if(!r){r=document.createElement('button');r.type='button';r.className='hlprow';r.dataset.pst='all';r.onclick=()=>topic(current());const n=out.querySelector('.pnav');n.after(r)}
+   const t=T[k];const html=sv(k)+'<span><b>How to use: '+t.t.replace(/^Plan · /,'')+'</b> · tutorial & video</span><span class="hchev">›</span>';if(r.dataset.k!==k){r.dataset.k=k;r.innerHTML=html}};
+  new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(add,120)}).observe(out,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});add()}
+ // other screens: a help row at the top of the ETA calculator and the bunker page
+ const top=(id,k,txt)=>{const el=$(id);if(!el)return;const put=()=>{if(el.querySelector(':scope > .hlprow'))return;const r=document.createElement('button');r.type='button';r.className='hlprow';r.innerHTML=sv(k)+'<span><b>'+txt+'</b> · tutorial & video</span><span class="hchev">›</span>';r.onclick=()=>topic(k);el.insertBefore(r,el.firstChild)};new MutationObserver(put).observe(el,{childList:true});put()};
+ top('etacalc','eta','How to use the ETA calculator');top('bunker','bunker','How to use the bunker calculation');
 })();
 </script>
 </body>
